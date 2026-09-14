@@ -8,7 +8,7 @@ import pyodbc  # type: ignore[import-not-found]
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
-JSON_PATH = PROJECT_ROOT / "data" / "raw" / "youbike_immediate.json"
+JSON_PATH = PROJECT_ROOT / "data" / "youbike_immediate.json"
 SQL_SERVER = "localhost"
 SQL_DATABASE = "TaipeiYouBikeAnalytics"
 SQL_DRIVER = "ODBC Driver 17 for SQL Server"

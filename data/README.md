@@ -16,23 +16,23 @@ Station reference:
 
 ## Expected Local Files
 
-Place the downloaded monthly trip CSV files under:
+Place the downloaded monthly trip CSV files directly under:
 
 ```text
-data/raw/unzipped/
+data/
 ```
 
 Use monthly filenames in `YYYYMM.csv` format, for example:
 
 ```text
-data/raw/unzipped/202503.csv
-data/raw/unzipped/202504.csv
+data/202503.csv
+data/202504.csv
 ```
 
 Place the station reference JSON at:
 
 ```text
-data/raw/youbike_immediate.json
+data/youbike_immediate.json
 ```
 
 The station reference is a point-in-time snapshot, not a historical station dimension.

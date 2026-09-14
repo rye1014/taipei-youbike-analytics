@@ -4,7 +4,7 @@
 
 ## Dataset
 
-The raw data files are not included in this GitHub repository. Instructions for obtaining and placing the source files are documented in `data/raw/README.md`.
+The raw data files are not included in this GitHub repository. Instructions for obtaining and placing the source files are documented in `data/README.md`.
 
 Data sources:
 
@@ -17,7 +17,7 @@ Confirmed local audit scope:
 - Primary analytical period: 2025-03 to 2026-02
 - Primary analytical period size: approximately 77.4 million trip records
 - Trip data source format: monthly CSV files
-- Station reference file: `data/raw/youbike_immediate.json`
+- Station reference file: `data/youbike_immediate.json`
 - Station reference snapshot date: 2026-09-11
 - Station reference size: 1,800 station records
 
