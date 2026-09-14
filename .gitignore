@@ -3,6 +3,8 @@ data/raw/*
 
 notes/
 
+sql/temp.sql
+
 .venv/
 __pycache__/
 .ipynb_checkpoints/
