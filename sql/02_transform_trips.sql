@@ -147,15 +147,27 @@ BEGIN TRY
             END AS duration_parse_failed,
             -- 判斷編碼
             CASE
-                WHEN dc.rent_station_name_raw LIKE N'%?%'
-                    OR dc.rent_station_name_raw LIKE N'%' + NCHAR(65533) + N'%'
-                    THEN CAST(1 AS BIT)
+                WHEN CHARINDEX(
+                    N'?',
+                    dc.rent_station_name_raw COLLATE Latin1_General_100_BIN2
+                ) > 0
+                OR CHARINDEX(
+                    NCHAR(65533),
+                    dc.rent_station_name_raw COLLATE Latin1_General_100_BIN2
+                ) > 0
+                THEN CAST(1 AS BIT)
                 ELSE CAST(0 AS BIT)
-            END AS origin_name_degraded,
+            END AS origin_name_degraded, 
             CASE
-                WHEN dc.return_station_name_raw LIKE N'%?%'
-                    OR dc.return_station_name_raw LIKE N'%' + NCHAR(65533) + N'%'
-                    THEN CAST(1 AS BIT)
+                WHEN CHARINDEX(
+                    N'?',
+                    dc.return_station_name_raw COLLATE Latin1_General_100_BIN2
+                ) > 0
+                OR CHARINDEX(
+                    NCHAR(65533),
+                    dc.return_station_name_raw COLLATE Latin1_General_100_BIN2
+                ) > 0
+                THEN CAST(1 AS BIT)
                 ELSE CAST(0 AS BIT)
             END AS destination_name_degraded
         FROM duration_components AS dc
