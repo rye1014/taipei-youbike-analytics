@@ -110,7 +110,7 @@ Key fields include:
 
 ## Data Quality & Methodology
 
-The analytical dataset was designed to preserve source information while making data-quality issues explicit rather than silently conrrecting or removing records. 
+The analytical dataset was designed to preserve source information while making data-quality issues explicit rather than silently correcting or removing records. 
 
 ### Trip duration
 
@@ -124,13 +124,13 @@ The original duration value is preserved in `trip_duration_raw` and separately c
 
 Origin and destination station names are matched to `station_reference.station_name` using exact matching only. 
 
-No fuzzy matching or manual station-name remapping is applied. If a historical station name cannot be matched to the current station reference, the trip is retained and the corresbonding station ID remains `NULL`. 
+No fuzzy matching or manual station-name remapping is applied. If a historical station name cannot be matched to the current station reference, the trip is retained and the corresponding station ID remains `NULL`. 
 
 This approach prioritizes reproducibility and avoids introducing uncertain mappings into the analytical dataset.
 
 ### Degraded station names
 
-Some source station names contain evidence of character degration, including:
+Some source station names contain evidence of character degradation, including:
 
 - ASCII question mark `?`
 - Unicode replacement character `U+FFFD`
@@ -176,17 +176,35 @@ After all 12 monthly files were loaded and transformed, the final analytical tab
 | Degraded origin station names | 158,570 |
 | Degraded destination station names | 158,302 |
 
-The validation confirmed that all 12 monthly source files were successfully loaded into `dbo.fact_trips`, producing 77,289,891 trip records for the primary analytical period. 
+The validation confirmed that all 12 monthly source files were successfully loaded into `dbo.fact_trips`, producing 77,389,891 trip records for the primary analytical period. 
 
-All rental timestamps, return timestaps, and source dates were parsed successfully. Only two duration values could not be parsed and wre retained with `duration_parse_failed = 1`. 
+All rental timestamps, return timestamps, and source dates were parsed successfully. Only two duration values could not be parsed and were retained with `duration_parse_failed = 1`. 
 
-Exact station-name matching inked 99.34% of origin records and 97.81% of destination records to the station reference, while both endpoints were matched for 97.21% of trips. 
+Exact station-name matching linked 99.34% of origin records and 97.81% of destination records to the station reference, while both endpoints were matched for 97.21% of trips. 
 
-A small proportion of station names were flagged as degraded because of source-level character loss. These records, along with unmatched station IDs, were retained rather than maually corrected or excluded. 
+A small proportion of station names were flagged as degraded because of source-level character loss. These records, along with unmatched station IDs, were retained rather than manually corrected or excluded. 
 
 The unmatched records are expected in part because the station reference is a point-in-time snapshot dated 2026-09-11 rather than a historical station dimension. 
 
 Detailed validation queries are available in `sql/03_validate_full_load.sql`. 
+
+### Performance optimization 
+
+The final `dbo.fact_trips` table contains more than 77 million records and is primarily used for analytical workloads involving large table scans, aggregations, and grouping operations.
+
+To improve query performance for these workloads, a clustered columnstore index was created on the fact table after the full data load and validation were completed.
+
+A representative monthly ridership aggregation was executed before and after the optimization using the same benchmark query:
+
+| Metric | Before | After | 
+| --- | ---: | ---: | 
+| Query elapsed time | 9.99 s | 3.73 s | 
+| CPU time | 39.47 s | 26.39 s | 
+| Table reserved storage | 11.54 GB | 3.57 GB | 
+
+For this benchmark, elapsed query time decreased by approximately 63%, while the table's reserved storage decreased by approximately 69%.
+
+The columnstore optimization is implemented in `sql/04_optimize_fact_table.sql`, and the benchmark query is available in `sql/benchmark/benchmark.sql`.
 
 ## Repository Structure
 
@@ -203,7 +221,10 @@ taipei-youbike-analytics/
 │   ├── 00_create_station_reference.sql
 │   ├── 01_create_trip_tables.sql
 │   ├── 02_transform_trips.sql
-│   └── 03_validate_full_load.sql
+│   ├── 03_validate_full_load.sql
+│   ├── 04_optimize_fact_table.sql
+│   └── benchmark/
+│       └── benchmark.sql
 │
 ├── src/
 │   ├── load_station_reference.py
@@ -225,6 +246,7 @@ Completed:
 - [x] SQL transformation pipeline
 - [x] Full 12-month database load
 - [x] Full-load data validation
+- [x] Analytical fact-table optimization
 
 In progress:
 
