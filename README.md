@@ -75,9 +75,13 @@ The broader historical dataset remains useful for understanding schema changes, 
 The ingestion pipeline follows the structure:
 
 CSV
+
 -> Python chunked ingestion
+
 -> SQL Server staging table
+
 -> SQL transformation
+
 -> analytical fact table
 
 ## Data Model
@@ -106,48 +110,87 @@ Key fields include:
 
 ## Data Quality & Methodology
 
+The analytical dataset was designed to preserve source information while making data-quality issues explicit rather than silently conrrecting or removing records. 
+
 ### Trip duration
 
-The raw `rent` field represents trip duration in `HH:MM:SS` format.
+The raw `rent` field represents trip duration in `HH:MM:SS` format and is treated as the primary duration measure. 
 
-It is treated as the primary duration source rather than calculating duration from rental and return timestamps, because the timestamp fields appear to be rounded while the duration field retains finer precision.
+Rental and return timestamps appear to be rounded, while the duration field retains finer time precision. For this reason, trip duration is not recalculated from `rent_time` and `return_time`.
 
-The raw duration is preserved and separately converted to seconds.
+The original duration value is preserved in `trip_duration_raw` and separately converted to `trip_duration_seconds` for analysis. Records that cannot be parsed are retained and flagged using `duration_parse_failed`.
 
 ### Station matching
 
-Trip station names are matched to `station_reference.station_name` using exact matching only.
+Origin and destination station names are matched to `station_reference.station_name` using exact matching only. 
 
-No fuzzy matching or manual remapping is applied.
+No fuzzy matching or manual station-name remapping is applied. If a historical station name cannot be matched to the current station reference, the trip is retained and the corresbonding station ID remains `NULL`. 
 
-Trips that cannot be matched are retained, with the corresponding station ID stored as `NULL`.
+This approach prioritizes reproducibility and avoids introducing uncertain mappings into the analytical dataset.
 
 ### Degraded station names
 
-Some source station names contain degraded characters such as:
+Some source station names contain evidence of character degration, including:
 
-- `?`
+- ASCII question mark `?`
 - Unicode replacement character `U+FFFD`
 
-These records are retained and flagged rather than manually corrected.
+These values are preserved as they appear in the source and flagged using `origin_name_degraded` or `destination_name_degraded`.
+
+No attempt is made to reconstruct missing characters because the original text cannot be recovered reliably from the affected records.
 
 ### Duplicates
 
-Exact duplicate trip rows may exist in the source data.
+Exact duplicate trip rows are not automatically removed.
 
-They are not automatically removed because the dataset does not contain a source transaction ID, and identical rows cannot safely be assumed to represent duplicate journeys.
+The source data does not provide a unique transaction identifier, so two identical rows cannot be reliably distinguished as either duplicate records or separate trips with identical attributes.
+
+Removing them would therefore require an unsupported assumption about the source data.
 
 ### Source lineage
 
-No artificial transaction ID is created.
+No artificial trip transaction ID is created.
 
-Each trip remains traceable through:
+Each record remains traceable to its source CSV using the combination:
 
 `source_file + row_number_in_file`
 
+This preserves row-level lineage without implying the existence of a source transaction identifier.
+
+### Full-load validation
+
+After all 12 monthly files were loaded and transformed, the final analytical table was validated using `sql/03_validate_full_load.sql`.
+
+| Validation check | Result |
+| --- | --- | 
+| Analysis period | 2025-03 to 2026-02 | 
+| Monthly source files | 12 | 
+| Total trip records | 77,389,891 |
+| `rent_time` parsing failures | 0 |
+| `return_time` parsing failures | 0 |
+| `info_date` parsing failures | 0 |
+| Duration parsing failures | 2 | 
+| Origin station match rate | 99.34% |
+| Destination station match rate | 97.81% |
+| Both stations matched | 97.21% |
+| Degraded origin station names | 158,570 |
+| Degraded destination station names | 158,302 |
+
+The validation confirmed that all 12 monthly source files were successfully loaded into `dbo.fact_trips`, producing 77,289,891 trip records for the primary analytical period. 
+
+All rental timestamps, return timestaps, and source dates were parsed successfully. Only two duration values could not be parsed and wre retained with `duration_parse_failed = 1`. 
+
+Exact station-name matching inked 99.34% of origin records and 97.81% of destination records to the station reference, while both endpoints were matched for 97.21% of trips. 
+
+A small proportion of station names were flagged as degraded because of source-level character loss. These records, along with unmatched station IDs, were retained rather than maually corrected or excluded. 
+
+The unmatched records are expected in part because the station reference is a point-in-time snapshot dated 2026-09-11 rather than a historical station dimension. 
+
+Detailed validation queries are available in `sql/03_validate_full_load.sql`. 
+
 ## Repository Structure
 
-```
+``` text
 taipei-youbike-analytics/
 ├── data/
 │   ├── 202503.csv
