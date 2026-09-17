@@ -1,10 +1,9 @@
 data/*
 !data/README.md
 
-notes/
-
 sql/temp.sql
 
+*.txt
 .venv/
 __pycache__/
 .ipynb_checkpoints/
