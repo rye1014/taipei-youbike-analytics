@@ -98,7 +98,7 @@
 - 汀州思源街口東南側與景文街142巷口的 relative imbalance 分別為 16.79% 與 16.24%，亦呈現較強的租借方向不平衡
 - 捷運北投站（1號出口）與松仁路95巷口同時具有較大的 absolute imbalance 與 relative imbalance，分別為 +53,942 / 13.46% 與 +53,264 / 11.44%，顯示其方向差異並非單純由高總活動量造成
 - 捷運松江南京站（7號出口）則呈現相反方向，租借次數高於歸還次數，absolute imbalance 為 33,947，relative imbalance 為 11.07%
--  relative imbalance 僅表示分析期間 trip records 中租借與歸還的方向性差異，不能解讀為站點實際缺車、滿車或庫存變化，因為資料不包含營運商的車輛調度紀錄
+- relative imbalance 僅表示分析期間 trip records 中租借與歸還的方向性差異，不能解讀為站點實際缺車、滿車或庫存變化，因為資料不包含營運商的車輛調度紀錄
   
 ### 高活動站點的每小時租借/歸還模式
 
@@ -126,3 +126,61 @@
 - 這也進一步顯示，全年 net flow 單一數值不足以描述站點完整的日內方向特性。
 - 早上 07:00–09:59 與傍晚 17:00–19:59 的定義，是根據前一階段 network-level usage analysis 中觀察到的主要尖峰時段設定，並非官方營運時段定義。
 - 尖峰方向差異仍只能描述 trip event patterns，不能據此判定實際調度需求或使用者旅次目的。
+
+## 03
+
+### 熱門路線
+
+- 熱門 OD 路線中出現多組明顯的雙向連結，例如「臺灣科技大學後門 ↔ 捷運公館站（2號出口）」、「捷運象山站（2號出口） ↔ 象山公園」以及「清江國小 ↔ 捷運奇岩站（三合街）」。
+- 單一方向 trip volume 最高的路線為「臺灣科技大學後門 → 捷運公館站（2號出口）」，共有 60,359 次 trips。
+- Top 20 中出現同站借還路線，其中「大稻埕碼頭 → 大稻埕碼頭」共有 39,786 次 trips。
+- 目前 Top 20 路線的起點與終點皆位於相同 area，顯示最高流量的 station-to-station connections 在此排名中主要出現在區內。
+- 熱門 OD routes 並非單純由單方向流動構成，部分高流量 station pairs 在兩個方向皆具有大量 trips，因此後續分析應保留 OD 的方向性，而不能將 A → B 與 B → A 直接合併。
+- same-station trips 不代表 station-to-station movement，因此需要先確認其在整體 matched OD trips 中的占比，再決定是否從後續 inter-station flow analysis 中排除。
+- 僅憑 station name 與 OD frequency 無法判定旅次目的。
+- 即使兩個站點名稱看起來鄰近，也不應在尚未進行地理距離分析前直接將熱門 OD routes 定義為「短程旅次」。
+
+### 同站歸還與跨站旅次
+
+- 在起點與終點皆成功匹配的 OD trips 中，70,647,022 筆（93.91%）為不同站點之間的旅次，4,580,745 筆（6.09%）為同站借還。
+- 同站借還約占 matched OD trips 的 6%，並非極少數紀錄，因此不應視為異常資料或直接從原始資料中刪除。
+- same-station trips 與 inter-station trips 描述的移動型態不同。前者起點與終點相同，無法代表站點之間的 directional mobility flow。
+- 因此，後續分析 station-to-station connections、熱門 OD routes 與流向時，將排除 same-station trips；但這些紀錄仍保留在 fact table 中，並可作為獨立的使用型態進行分析。
+- 同站借還不代表「沒有移動」。使用者可能實際騎行後回到原站，但目前資料沒有完整軌跡，因此無法得知其實際移動路徑或旅次目的。
+- 6.09% 的比例以起點與終點皆成功匹配的 trips 為分母，而非全部 77,389,891 筆 trip records。
+
+### 同站借還較多的站點
+
+- 同站借還並非平均分布於所有站點，而是在部分站點出現較高的 trip count。
+- 大稻埕碼頭的 same-station trips 最高，共 39,786 次，明顯高於其他站點。
+- 其次為捷運圓山站（1號出口）21,029 次、捷運永春站（2號出口）16,211 次，以及捷運信義安和站（4號出口）14,932 次。
+- Top 20 中同時包含捷運站、公園周邊、住宅區與其他類型站點，因此僅從站名無法歸納出單一的 same-station usage profile。
+- Query 2 顯示 same-station trips 占 matched OD trips 的 6.09%，而 Query 3 進一步顯示這類旅次在部分站點具有較高的絕對數量。
+- same-station trips 不適合與一般 station-to-station OD flow 混合分析，因為其起點與終點相同，無法表示站點之間的移動方向。
+- 因此後續主要 OD mobility analysis 將聚焦於不同站點之間的 trips，而 same-station trips 保留為獨立的使用型態。
+- same-station trip 並不代表沒有實際騎乘。資料只記錄借還站點，沒有 GPS 軌跡，因此無法確認使用者實際經過的路線或騎乘距離。
+- 即使某些站點名稱看似與觀光、休閒或住宅用途相關，也不能僅依站名與 same-station trip count 推論旅次目的。
+
+### 熱門跨站路線
+
+- 排除同站借還後，單一方向 trip volume 最高的路線為「臺灣科技大學後門 → 捷運公館站（2號出口）」，共有 60,359 次 trips。
+- 其次為「臺灣科技大學側門 → 捷運公館站（2號出口）」56,899 次，以及「捷運象山站（2號出口）→ 象山公園」54,310 次。
+- Top 20 inter-station routes 中仍可觀察到多組反向路線同時排名前列，例如臺灣科技大學與公館站、象山站與象山公園、清江國小與捷運奇岩站等。
+- Top 20 路線的 origin area 與 destination area 皆相同，顯示最高流量的 station-to-station connections 在此排名中主要為區內移動。
+- directed OD ranking 會將 A → B 與 B → A 視為不同路線，因此同一組高流量 station pair 可能在排名中出現兩次。
+- 多組熱門路線在兩個方向皆具有較高 trip volume，表示後續除了分析單方向 route 外，也值得從 station-pair 層級比較雙向總流量與方向差異。
+- Top 20 均為同區路線，只能描述最高流量排名的特徵，不能據此推論整體 YouBike trips 大多都是區內移動；整體 same-area / cross-area 比例應另外計算。
+- OD frequency 本身不能判定旅次目的或兩站之間的實際騎乘路徑。
+
+### 熱門雙向 station pairs
+
+- 將 A -> B 與 B -> A 合併為同一組 station pairs 後，總流量最高的是「捷運公館站（2號出口）<-> 臺灣科技大學後門」，共有 113,118 次 trips。
+- 其次為「捷運象山站（2號出口）<-> 象山公園」104,675 次，以及「捷運公館站（2號出口）<-> 臺灣科技大學側門」103,966 次。
+- 多數高流量 station pairs 的兩個方向相對接近。例如「臺灣師範大學（圖書館）↔ 捷運古亭站（6號出口）」共有 66,774 次 trips，directional imbalance 僅 0.21%；「西本願寺廣場 ↔ 中華桂林路口」亦僅 0.44%。
+- 但部分熱門 station pairs 存在較明顯的方向差異。例如「臺北醫學大學 ↔ 捷運台北101/世貿站（2號出口）」的 directional imbalance 為 19.80%，「臺灣師範大學（圖書館）↔ 捷運東門站（5號出口）」為 15.17%。
+- 流量最高的三組 station pairs directional imbalance 分別為 6.72%、3.77% 與 9.46%，顯示高 combined flow 並不必然代表高度單向流動。
+- 將兩個方向合併後，可以區分「connection 本身是否熱門」與「connection 是否主要由某一方向主導」兩個不同概念。
+- `total_pair_trips` 衡量兩站之間整體連結強度，而 `directional_imbalance_pct` 衡量兩個方向的相對差異。
+- 熱門 station pairs 中同時存在高度平衡與較具方向性的連結，因此只看 directed OD ranking 無法完整描述兩站之間的互動模式。
+- `station_1` 與 `station_2` 僅依 station ID 大小排序，用於建立一致的 pair 定義，本身沒有起點、終點或地理方向意義。
+- directional imbalance 只能描述兩方向 trip count 的差異，不能直接推論旅次目的或造成差異的原因。
