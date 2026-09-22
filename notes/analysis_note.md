@@ -240,3 +240,38 @@
 - Day type 對個別 route 的平均每日流量與排名仍有影響，但對 Top 20 route 組成的影響相對有限。
 - 90% 指的是 Weekday Top 20 directed routes 中，有 18 條也出現在 Weekend Top 20，不代表全體 OD routes 有 90% 相同。
 - Top 20 overlap 衡量的是熱門 route 組成的穩定性，不代表同一 route 在 weekday 與 weekend 的流量完全一致。
+
+## 04
+
+station_reference.area 共包含 13 個由資料來源定義的 area 類別，包括台北市 12 個行政區，以及另外獨立分類的「台大公館校區」
+
+### 1. Area 租借、歸還與總活動量
+
+- 在 source-defined area 中，大安區的整體活動量最高，共 30,800,274 次 rental/return events，明顯高於其他區域
+- 中山區與信義區分別為第二、第三高，total activity 為 17,802,704 與 16,630,392。
+- 文山區的 total activity 最低，為 5,333,994；南港區與北投區亦相對較低。
+- 各 area 的 rental 與 return trips 整體相當接近，但仍存在不同程度的 directional imbalance。
+- 萬華區的正向 net flow 最大，returns 比 rentals 多 73,600 次；臺大公館校區的負向 net flow幅度最大，rentals 比 returns 多 65,019 次。
+- 中山區與中正區亦呈現較大的負向 net flow，分別為 -56,084 與 -48,213；士林區與北投區則有較明顯的正向 net flow。
+- Area-level total activity 顯示不同 station areas 的 YouBike 使用規模存在明顯差異，其中大安區的整體活動量遠高於其他 area。
+- Net flow 可用來描述各 area 在分析期間內 rental 與 return events 的方向差異，但相較於數百萬至數千萬的 total activity，各 area 的年度淨差異整體仍相對有限。
+- Area-level aggregation 可以補充 station-level analysis，讓整體空間分布與方向性更容易比較。
+- 本分析中的 `area` 為 station reference 所定義的 13 個類別，包括臺北市 12 個行政區及獨立的「臺大公館校區」，因此不完全等同於官方行政區。
+- Query 僅使用 origin 與 destination 都成功匹配 station reference 的 75,227,767 筆 trips，使 rentals 與 returns 建立在相同的 trip population 上。
+- `net_flow = returns - rentals` 只代表 trip event 的方向差異，不能解讀為實際車輛庫存增加或減少，因為資料中沒有自行車調度紀錄。
+
+### 2. Area 每個 active station 的平均活動量
+
+- 大安區共有 209 個 active stations，平均每站活動量為 147,369.73 次 rental/return events，不僅在 Query 1 的 total activity 排名第一，在 normalized 後仍排名第一。
+- 信義區共有 123 個 active stations，平均每站活動量為 135,206.44，排名第二；臺大公館校區僅有 60 個 active stations，但平均每站活動量達 120,745.28，排名第三。
+- 中山區在 Query 1 的 total activity 排名第二，但因 active stations 多達 197 個，平均每站活動量降至 90,369.06，排名第七。
+- 內湖區擁有最多的 active stations（213 個），但平均每站活動量最低，為 39,946.54；其 total activity 在 Query 1 排名第七。
+- 13 個 area 合計共有 1,719 個 active stations（依本 Query 的分析定義）。
+- 大安區的高 total activity 並不能只用站點數較多解釋；在控制 active station count 後，其平均單站活動量仍為所有 area 中最高。
+- 中山區則呈現不同情況：整體活動量很高，但部分原因與較大的 active station network 有關，因此 normalized ranking 明顯下降。
+- 臺大公館校區的 total activity 並非最高，但因 active station count 較少，其平均單站活動量相對集中。
+- Query 1 與 Query 2 分別提供「整體網路規模」與「平均單站活動強度」兩種不同視角，兩者不應互相取代。
+- Active station 定義為分析期間內，在 origin 與 destination 都成功匹配的 trips 中，至少曾作為 origin 或 destination 出現一次的 station。
+- `avg_activity_per_active_station` 為整個 12 個月分析期間的平均 rental/return events per active station，不是每日平均，也不是 station utilization rate。
+- 此指標未控制各站的實際營運天數。部分 station 可能只在分析期間的一部分時間營運，因此不能將較低的平均活動量直接解讀為使用效率較差。
+- station reference 為 2026-09 snapshot，因此未直接使用其中全部 1,800 個 stations 作為 denominator。
