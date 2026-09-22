@@ -217,3 +217,26 @@
 - 某條反方向沒有進入 Evening Top 20，不代表傍晚沒有該方向的 trips，只代表其流量未達傍晚前 20 名。
 - 此分析以 directed route 為單位，同一 station pair 的兩個方向可能分別出現在 Morning Top 20 中，因此不能把這個 50% 解讀為 50% 的獨立 station pairs。
 - 早晚反向模式本身不能證明通勤、上學或返家等旅次目的。
+
+### 8. Weekday vs Weekend 熱門 OD 路線
+
+- Weekday 與 Weekend 的 Top 20 OD routes 高度相似，多條高流量路線在兩種 day type 中接排名前列
+- 「臺灣科技大學後門 → 捷運公館站（2號出口）」在 Weekday 與 Weekend 均排名第 1，平均每日 trips 分別為 160.83 與 176.59。
+- 「臺灣科技大學側門 → 捷運公館站（2號出口）」、「捷運象山站（2號出口）↔ 象山公園」、「清江國小 ↔ 捷運奇岩站（三合街）」等 routes 也同時出現在 Weekday 與 Weekend 的高排名位置。
+- 部分 routes 的排名具有 day-type 差異。例如「中華桂林路口 ↔ 西本願寺廣場」僅出現在 Weekend Top 20，而「捷運古亭站（6號出口）→ 臺灣師範大學（圖書館）」與「捷運大安森林公園站（5號出口）→ 建國和平路口西北側」則出現在 Weekday Top 20。
+- 使用 average daily trips 後，可以直接比較 Weekday 與 Weekend 的典型每日流量，而不受平日與週末天數不同的影響。
+- 熱門 station-to-station connections 在平日與週末之間具有相當程度的穩定性，顯示部分高流量 OD connections 並非只集中於單一 day type。
+- 不過，同一 route 的排名與平均每日流量仍可能因 day type 而改變，因此 weekday/weekend distinction 仍能提供全年 aggregate 無法呈現的資訊。
+- Weekend Top 20 中亦出現少數 Weekday Top 20 未包含的 routes，表示部分 connections 在週末的相對重要性提高。
+- Top 20 ranking 反映的是相對排名。某條 route 未進入其中一個 day type 的 Top 20，不代表該類日期沒有此 route。
+- `avg_daily_trips` 是各 route 在該 day type 全部日期中的平均每日 trips，因此包含該 route 當天為 0 trips 的日期概念。
+- 不能僅依 weekday/weekend 差異推論通勤、上課、觀光或休閒等旅次目的。
+
+### 9. Weekday vs Weekend 熱門路線重疊程度
+
+- Weekday Top 20 與 Weekend Top 20 directed OD routes 中共有 18 條重疊，重疊率為 90%。
+- 這表示最高流量的 station-to-station connections 在平日與週末之間具有高度穩定性，只有少數路線會因 day type 而進出 Top 20。
+- 相較於 Morning / Evening analysis 中較明顯的方向與排名變化，Weekday / Weekend 的熱門 OD 結構更加穩定。
+- Day type 對個別 route 的平均每日流量與排名仍有影響，但對 Top 20 route 組成的影響相對有限。
+- 90% 指的是 Weekday Top 20 directed routes 中，有 18 條也出現在 Weekend Top 20，不代表全體 OD routes 有 90% 相同。
+- Top 20 overlap 衡量的是熱門 route 組成的穩定性，不代表同一 route 在 weekday 與 weekend 的流量完全一致。

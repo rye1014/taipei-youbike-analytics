@@ -343,9 +343,217 @@ SELECT
         WHEN e.route_rank IS NOT NULL THEN 'Yes'
         ELSE 'No'
     END AS reverse_in_evening_top20
-    
+
 FROM morning_top20 m
 LEFT JOIN evening_top20 e
     ON m.origin_station_id = e.destination_station_id 
     AND m.destination_station_id = e.origin_station_id
 ORDER BY m.route_rank; 
+
+-- 8. Top OD routes on weekdays and weekends
+WITH day_counts AS (
+    SELECT 
+        CASE 
+            WHEN DATEPART(weekday, rent_time) BETWEEN 1 AND 5
+                THEN 'Weekday'
+            ELSE 'Weekend'
+        END AS day_type, 
+        COUNT(DISTINCT CAST(rent_time AS date)) AS number_of_days
+    FROM dbo.fact_trips
+    GROUP BY 
+        CASE 
+            WHEN DATEPART(weekday, rent_time) BETWEEN 1 AND 5
+                THEN 'Weekday'
+            ELSE 'Weekend'
+        END
+), 
+route_counts AS (
+    SELECT 
+        CASE 
+            WHEN DATEPART(weekday, f.rent_time) BETWEEN 1 AND 5
+                THEN 'Weekday'
+            ELSE 'Weekend'
+        END AS day_type, 
+
+        f.origin_station_id, 
+        o.station_name AS origin_station_name, 
+        o.area AS origin_area, 
+        f.destination_station_id, 
+        d.station_name AS destination_station_name, 
+        d.area AS destination_area, 
+
+        COUNT(*) AS trip_count
+
+    FROM dbo.fact_trips f
+    JOIN dbo.station_reference o
+        ON f.origin_station_id = o.station_id
+    JOIN dbo.station_reference d
+        ON f.destination_station_id = d.station_id
+
+    WHERE f.origin_station_id <> f.destination_station_id 
+
+    GROUP BY 
+        CASE 
+            WHEN DATEPART(weekday, f.rent_time) BETWEEN 1 AND 5
+                THEN 'Weekday'
+            ELSE 'Weekend'
+        END, 
+        f.origin_station_id, 
+        o.station_name, 
+        o.area, 
+        f.destination_station_id, 
+        d.station_name, 
+        d.area
+), 
+route_averages AS (
+    SELECT 
+        r.day_type, 
+        r.origin_station_id, 
+        r.origin_station_name, 
+        r.origin_area, 
+        r.destination_station_id, 
+        r.destination_station_name, 
+        r.destination_area, 
+        r.trip_count, 
+        CAST(
+            r.trip_count * 1.0 / d.number_of_days AS decimal(18, 2)
+        ) AS avg_daily_trips
+    FROM route_counts r 
+    JOIN day_counts d
+        ON r.day_type = d.day_type
+), 
+ranked_routes AS (
+    SELECT 
+        *, 
+        ROW_NUMBER() OVER (
+            PARTITION BY day_type
+            ORDER BY 
+                avg_daily_trips DESC, 
+                origin_station_id, 
+                destination_station_id
+        ) AS route_rank
+    FROM route_averages
+)
+SELECT 
+    day_type, 
+    route_rank, 
+    origin_station_id, 
+    origin_station_name, 
+    origin_area, 
+    destination_station_id, 
+    destination_station_name, 
+    destination_area,
+    trip_count, 
+    avg_daily_trips
+FROM ranked_routes 
+WHERE route_rank <= 20
+ORDER BY 
+    CASE day_type
+        WHEN 'Weekday' THEN 1
+        WHEN 'Weekend' THEN 2
+    END, 
+    route_rank; 
+
+-- 9. Weekday-to-weekend top 20 route overlap
+WITH day_counts AS (
+    SELECT 
+        CASE 
+            WHEN DATEPART(weekday, rent_time) BETWEEN 1 AND 5
+                THEN 'Weekday'
+            ELSE 'Weekend'
+        END AS day_type, 
+        COUNT(DISTINCT CAST(rent_time AS date)) AS number_of_days
+    FROM dbo.fact_trips
+    GROUP BY 
+        CASE 
+            WHEN DATEPART(weekday, rent_time) BETWEEN 1 AND 5
+                THEN 'Weekday'
+            ELSE 'Weekend'
+        END
+), 
+route_counts AS (
+    SELECT 
+        CASE 
+            WHEN DATEPART(weekday, f.rent_time) BETWEEN 1 AND 5
+                THEN 'Weekday'
+            ELSE 'Weekend'
+        END AS day_type, 
+
+        f.origin_station_id, 
+        o.station_name AS origin_station_name, 
+        o.area AS origin_area, 
+        f.destination_station_id, 
+        d.station_name AS destination_station_name, 
+        d.area AS destination_area, 
+
+        COUNT(*) AS trip_count
+
+    FROM dbo.fact_trips f
+    JOIN dbo.station_reference o
+        ON f.origin_station_id = o.station_id
+    JOIN dbo.station_reference d
+        ON f.destination_station_id = d.station_id
+
+    WHERE f.origin_station_id <> f.destination_station_id 
+
+    GROUP BY 
+        CASE 
+            WHEN DATEPART(weekday, f.rent_time) BETWEEN 1 AND 5
+                THEN 'Weekday'
+            ELSE 'Weekend'
+        END, 
+        f.origin_station_id, 
+        o.station_name, 
+        o.area, 
+        f.destination_station_id, 
+        d.station_name, 
+        d.area
+), 
+route_averages AS (
+    SELECT 
+        r.day_type, 
+        r.origin_station_id, 
+        r.origin_station_name, 
+        r.origin_area, 
+        r.destination_station_id, 
+        r.destination_station_name, 
+        r.destination_area, 
+        r.trip_count, 
+        CAST(
+            r.trip_count * 1.0 / d.number_of_days AS decimal(18, 2)
+        ) AS avg_daily_trips
+    FROM route_counts r 
+    JOIN day_counts d
+        ON r.day_type = d.day_type
+), 
+ranked_routes AS (
+    SELECT 
+        *, 
+        ROW_NUMBER() OVER (
+            PARTITION BY day_type
+            ORDER BY 
+                avg_daily_trips DESC, 
+                origin_station_id, 
+                destination_station_id
+        ) AS route_rank
+    FROM route_averages
+), 
+weekday_top20 AS (
+    SELECT * 
+    FROM ranked_routes 
+    WHERE day_type = 'Weekday'
+        AND route_rank <= 20
+), 
+weekend_top20 AS (
+    SELECT * 
+    FROM ranked_routes 
+    WHERE day_type = 'Weekend'
+        AND route_rank <= 20
+)
+SELECT 
+    COUNT(*) AS overlapping_routes, 
+    CAST(COUNT(*) * 100.0 / 20 AS decimal(5, 2)) AS overlap_pct
+FROM weekday_top20 AS w
+JOIN weekend_top20 AS e
+    ON w.origin_station_id = e.origin_station_id 
+        AND w.destination_station_id = e.destination_station_id; 
