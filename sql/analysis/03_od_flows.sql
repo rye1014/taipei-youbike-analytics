@@ -6,15 +6,19 @@ SELECT TOP 20
     o.station_id AS origin_station_id,
     o.station_name AS origin_station_name, 
     o.area AS origin_area, 
+
     d.station_id AS destination_station_id, 
     d.station_name AS destination_station_name, 
     d.area AS destination_area, 
+
     COUNT(*) as trip_count
+
 FROM dbo.fact_trips f
 JOIN dbo.station_reference o
     ON f.origin_station_id = o.station_id 
 JOIN dbo.station_reference d
     ON f.destination_station_id = d.station_id
+
 GROUP BY 
     o.station_id, 
     o.station_name, 
@@ -22,6 +26,7 @@ GROUP BY
     d.station_id, 
     d.station_name, 
     d.area
+
 ORDER BY 
     trip_count DESC, 
     o.station_id, 
@@ -74,16 +79,21 @@ SELECT TOP 20
     o.station_id AS origin_station_id,
     o.station_name AS origin_station_name, 
     o.area AS origin_area, 
+
     d.station_id AS destination_station_id, 
     d.station_name AS destination_station_name, 
     d.area AS destination_area, 
+
     COUNT(*) as trip_count
+
 FROM dbo.fact_trips f
 JOIN dbo.station_reference o
     ON f.origin_station_id = o.station_id 
 JOIN dbo.station_reference d
     ON f.destination_station_id = d.station_id
+
 WHERE f.origin_station_id <> f.destination_station_id
+
 GROUP BY 
     o.station_id, 
     o.station_name, 
@@ -91,6 +101,7 @@ GROUP BY
     d.station_id, 
     d.station_name, 
     d.area
+
 ORDER BY 
     trip_count DESC, 
     o.station_id, 
@@ -145,12 +156,15 @@ SELECT TOP 20
     p.station_1_id, 
     s1.station_name AS station_1_name, 
     s1.area AS station_1_area, 
+
     p.station_2_id, 
     s2.station_name AS station_2_name, 
     s2.area AS station_2_area, 
+
     p.station_1_to_2_trips, 
     p.station_2_to_1_trips, 
     p.total_pair_trips, 
+
     ABS(
         p.station_1_to_2_trips - p.station_2_to_1_trips
     ) AS directional_difference, 
@@ -168,3 +182,170 @@ ORDER BY
     p.total_pair_trips DESC, 
     p.station_1_id, 
     p.station_2_id; 
+
+-- 6. Top OD routes during morning and evening peak periods
+WITH peak_routes AS (
+    SELECT 
+        CASE  
+            WHEN DATEPART(hour, f.rent_time) BETWEEN 7 AND 9
+                THEN 'Morning'
+            WHEN DATEPART(hour, f.rent_time) BETWEEN 17 AND 19
+                THEN 'Evening'
+        END AS peak_period, 
+
+        f.origin_station_id, 
+        o.station_name AS origin_station_name, 
+        o.area AS origin_area, 
+
+        f.destination_station_id, 
+        d.station_name AS destination_station_name, 
+        d.area AS destination_area, 
+
+        COUNT(*) AS trip_count
+
+    FROM dbo.fact_trips f
+    JOIN dbo.station_reference o
+        ON f.origin_station_id = o.station_id
+    JOIN dbo.station_reference d 
+        ON f.destination_station_id = d.station_id
+
+    WHERE f.origin_station_id <> f.destination_station_id 
+        AND (
+            DATEPART(hour, f.rent_time) BETWEEN 7 AND 9
+            OR DATEPART(hour, f.rent_time) BETWEEN 17 AND 19
+        )
+    
+    GROUP BY 
+        CASE  
+            WHEN DATEPART(hour, f.rent_time) BETWEEN 7 AND 9
+                THEN 'Morning'
+            WHEN DATEPART(hour, f.rent_time) BETWEEN 17 AND 19
+                THEN 'Evening'
+        END, 
+        f.origin_station_id, 
+        o.station_name, 
+        o.area, 
+        f.destination_station_id, 
+        d.station_name, 
+        d.area
+), 
+ranked_routes AS (
+    SELECT
+        *, 
+        ROW_NUMBER() OVER (
+            PARTITION BY peak_period
+            ORDER BY 
+                trip_count DESC, 
+                origin_station_id, 
+                destination_station_id
+        ) AS route_rank
+    FROM peak_routes
+)
+SELECT 
+    peak_period, 
+    route_rank, 
+    origin_station_id, 
+    origin_station_name, 
+    origin_area, 
+    destination_station_id, 
+    destination_station_name, 
+    destination_area, 
+    trip_count
+FROM ranked_routes 
+WHERE route_rank <= 20
+ORDER BY 
+    CASE peak_period 
+        WHEN 'Morning' THEN 1 
+        WHEN 'Evening' THEN 2
+    END, 
+    route_rank; 
+
+-- 7. Morning-to-evening reverse-route overlap
+WITH peak_routes AS (
+    SELECT 
+        CASE  
+            WHEN DATEPART(hour, f.rent_time) BETWEEN 7 AND 9
+                THEN 'Morning'
+            WHEN DATEPART(hour, f.rent_time) BETWEEN 17 AND 19
+                THEN 'Evening'
+        END AS peak_period, 
+
+        f.origin_station_id, 
+        o.station_name AS origin_station_name, 
+        o.area AS origin_area, 
+
+        f.destination_station_id, 
+        d.station_name AS destination_station_name, 
+        d.area AS destination_area, 
+
+        COUNT(*) AS trip_count
+
+    FROM dbo.fact_trips f
+    JOIN dbo.station_reference o
+        ON f.origin_station_id = o.station_id
+    JOIN dbo.station_reference d 
+        ON f.destination_station_id = d.station_id
+
+    WHERE f.origin_station_id <> f.destination_station_id 
+        AND (
+            DATEPART(hour, f.rent_time) BETWEEN 7 AND 9
+            OR DATEPART(hour, f.rent_time) BETWEEN 17 AND 19
+        )
+    
+    GROUP BY 
+        CASE  
+            WHEN DATEPART(hour, f.rent_time) BETWEEN 7 AND 9
+                THEN 'Morning'
+            WHEN DATEPART(hour, f.rent_time) BETWEEN 17 AND 19
+                THEN 'Evening'
+        END, 
+        f.origin_station_id, 
+        o.station_name, 
+        o.area, 
+        f.destination_station_id, 
+        d.station_name, 
+        d.area
+), 
+ranked_routes AS (
+    SELECT
+        *, 
+        ROW_NUMBER() OVER (
+            PARTITION BY peak_period
+            ORDER BY 
+                trip_count DESC, 
+                origin_station_id, 
+                destination_station_id
+        ) AS route_rank
+    FROM peak_routes
+), 
+morning_top20 AS (
+    SELECT * 
+    FROM ranked_routes 
+    WHERE peak_period = 'Morning'
+        AND route_rank <= 20
+), 
+evening_top20 AS (
+    SELECT * 
+    FROM ranked_routes 
+    WHERE peak_period = 'Evening'
+        AND route_rank <= 20
+)
+SELECT 
+    m.route_rank AS morning_rank, 
+    m.origin_station_name AS morning_origin, 
+    m.destination_station_name AS morning_destination, 
+    m.trip_count AS morning_trip_count, 
+
+    e.route_rank AS evening_reverse_rank, 
+    e.trip_count AS evening_reverse_trip_count, 
+
+    CASE 
+        WHEN e.route_rank IS NOT NULL THEN 'Yes'
+        ELSE 'No'
+    END AS reverse_in_evening_top20
+    
+FROM morning_top20 m
+LEFT JOIN evening_top20 e
+    ON m.origin_station_id = e.destination_station_id 
+    AND m.destination_station_id = e.origin_station_id
+ORDER BY m.route_rank; 
