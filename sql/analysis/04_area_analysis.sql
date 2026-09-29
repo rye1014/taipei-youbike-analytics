@@ -144,3 +144,98 @@ SELECT
     ) AS network_activity_share_pct
 FROM area_activity 
 ORDER BY total_activity DESC; 
+
+-- 4. Top directed flows between areas
+WITH matched_trips AS (
+    SELECT 
+        o.area AS origin_area, 
+        d.area AS destination_area
+    FROM dbo.fact_trips f
+    JOIN dbo.station_reference o
+        ON f.origin_station_id = o.station_id
+    JOIN dbo.station_reference d
+        ON f.destination_station_id = d.station_id
+    WHERE f.origin_station_id IS NOT NULL
+        AND f.destination_station_id IS NOT NULL    
+)
+SELECT TOP 20
+    origin_area, 
+    destination_area, 
+    COUNT(*) AS trip_count
+FROM matched_trips
+WHERE origin_area <> destination_area
+GROUP BY 
+    origin_area, 
+    destination_area
+ORDER BY 
+    trip_count DESC, 
+    origin_area, 
+    destination_area; 
+
+-- 5. Top area pairs by combined bidirectional flow
+WITH matched_trips AS (
+    SELECT 
+        o.area AS origin_area, 
+        d.area AS destination_area
+    FROM dbo.fact_trips f
+    JOIN dbo.station_reference o
+        ON f.origin_station_id = o.station_id
+    JOIN dbo.station_reference d
+        ON f.destination_station_id = d.station_id
+    WHERE f.origin_station_id IS NOT NULL
+        AND f.destination_station_id IS NOT NULL    
+), 
+area_pairs AS (
+    SELECT 
+        CASE
+            WHEN origin_area < destination_area
+                THEN origin_area
+            ELSE destination_area
+        END AS area_1, 
+        CASE 
+            WHEN origin_area < destination_area
+                THEN destination_area
+            ELSE origin_area
+        END AS area_2, 
+        SUM(
+            CASE 
+                WHEN origin_area < destination_area THEN 1
+                ELSE 0
+            END
+        ) AS area_1_to_2_trips, 
+        SUM(
+            CASE 
+                WHEN origin_area > destination_area THEN 1
+                ELSE 0
+            END
+        ) AS area_2_to_1_trips, 
+        COUNT(*) AS total_pair_trips
+    FROM matched_trips
+    WHERE origin_area <> destination_area
+    GROUP BY 
+        CASE
+            WHEN origin_area < destination_area
+                THEN origin_area
+            ELSE destination_area
+        END, 
+        CASE 
+            WHEN origin_area < destination_area
+                THEN destination_area
+            ELSE origin_area
+        END 
+)
+SELECT TOP 20
+    area_1, 
+    area_2, 
+    area_1_to_2_trips, 
+    area_2_to_1_trips, 
+    total_pair_trips, 
+    ABS(area_1_to_2_trips - area_2_to_1_trips) AS directional_difference, 
+    CAST(
+        ABS(area_1_to_2_trips - area_2_to_1_trips) * 100.0 / total_pair_trips AS decimal(5, 2)
+    ) AS directional_imbalance_pct
+FROM area_pairs
+ORDER BY 
+    total_pair_trips DESC, 
+    area_1, 
+    area_2; 

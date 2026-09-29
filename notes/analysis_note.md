@@ -289,3 +289,40 @@ station_reference.area 共包含 13 個由資料來源定義的 area 類別，�
 - `network_activity_share_pct` 的 denominator 為 origin 與 destination 都成功匹配的 75,227,767 筆 trips 所產生的 150,455,534 次 rental/return events。
 - Share 反映的是 activity event 的分布，不代表人口、土地面積、需求強度或服務效率。
 - 本分析中的 area 為資料來源定義的分類，包含獨立的「臺大公館校區」，因此不完全等同於官方行政區。
+
+### 4. Area 之間的熱門 directed flows
+
+- Top 20 directed area-to-area flows 由 10 組雙向 area pairs 構成，每一條 A -> B 高流量路線，其反方向 B -> A 也同樣進入 Top 20
+- 最大的 directed flow 為「臺大公館校區 → 大安區」，共有 1,505,965 trips；反方向「大安區 → 臺大公館校區」亦有 1,439,552 trips。
+- 「大安區 ↔ 中正區」與「大安區 ↔ 信義區」也是流量非常高的 area connections，兩個方向皆超過 100 萬 trips。
+- 其他高流量雙向 connections 包括：
+  - 中正區 ↔ 萬華區
+  - 中山區 ↔ 松山區
+  - 中山區 ↔ 大同區
+  - 信義區 ↔ 松山區
+  - 大安區 ↔ 松山區
+  - 中山區 ↔ 大安區
+  - 中山區 ↔ 中正區
+- 多數高流量 area pairs 的兩個方向在絕對 trip count 上相對接近。
+- Area-level aggregation 顯示，高流量 movement 並非主要由單一方向構成，而是多數熱門 area connections 在兩個方向都具有大量 trips。
+- 這表示只看 directed ranking 會把同一組 area connection 拆成兩筆；將兩個方向合併後，可以更直接衡量 area pair 本身的整體連結強度。
+- 大安區出現在多組 Top 20 flows 中，與 Query 1–3 中其高 overall activity 相互呼應。
+- 本分析中的 area 為資料來源定義的 station area，而非嚴格的行政區。
+- 特別是「臺大公館校區 ↔ 大安區」雖然在資料分類中屬於 between-area flow，但不能直接解讀為跨行政區移動。
+- Trip count 僅表示 origin area 與 destination area 的組合，無法推論實際騎乘路徑或旅次目的。
+- Top 20 僅代表流量最高的 directed area flows，不代表其他 area pairs 沒有互動。
+
+### 5. Area pairs 的雙向流量與方向差異
+
+- 將 A -> B 與 B -> A 合併後，流量最高的 area pair 為「大安區 ↔ 臺大公館校區」，共 2,945,517 trips。
+- 第二、第三高分別為「大安區 ↔ 中正區」2,366,669 trips，以及「大安區 ↔ 信義區」2,043,719 trips。
+- 高流量 area pairs 的兩個方向普遍相當接近。Top 20 中有 19 組的 directional imbalance 低於 6%。
+- 「松山區 ↔ 信義區」的 directional imbalance 僅 0.16%，「大安區 ↔ 中山區」與「信義區 ↔ 南港區」也都只有 0.24%。
+- Top 20 中方向差異最明顯的是「士林區 ↔ 大同區」，directional imbalance 為 13.31%；其次為「大安區 ↔ 文山區」5.81% 與「大同區 ↔ 中正區」5.15%。
+- 將兩個方向合併後，可以更直接衡量 area pair 本身的整體連結強度，而不會像 directed ranking 一樣把同一組 connection 拆成兩筆。
+- 多數高流量 area pairs 在整個分析期間內呈現相對平衡的雙向 flow，顯示其高 combined volume 並非主要由單一方向所構成。
+- 大安區出現在多組高流量 area pairs 中，與前面 Query 1 - 3 顯示的大安區高 overall activity 相互一致。
+- `area_1` 與 `area_2` 只是依 area 名稱排序後建立一致的 pair 定義，本身沒有 origin、destination 或地理方向上的意義。
+- `directional_imbalance_pct` 衡量的是兩方向 trip count 的相對差異，不能直接推論人口流動、通勤方向或實際自行車庫存變化。
+- 「大安區 ↔ 臺大公館校區」在資料分類中屬於 between-area pair，但由於「臺大公館校區」是資料來源額外定義的 area，因此不能直接解讀為跨行政區移動。
+- 本結果僅涵蓋 combined trip volume 最高的 Top 20 area pairs。
