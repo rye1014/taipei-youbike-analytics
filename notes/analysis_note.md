@@ -275,3 +275,17 @@ station_reference.area 共包含 13 個由資料來源定義的 area 類別，�
 - `avg_activity_per_active_station` 為整個 12 個月分析期間的平均 rental/return events per active station，不是每日平均，也不是 station utilization rate。
 - 此指標未控制各站的實際營運天數。部分 station 可能只在分析期間的一部分時間營運，因此不能將較低的平均活動量直接解讀為使用效率較差。
 - station reference 為 2026-09 snapshot，因此未直接使用其中全部 1,800 個 stations 作為 denominator。
+
+### 3. Area 佔整體 network activity 的比例
+
+- 大安區佔整體 matched network activity 的 20.47%，是所有 source-defined areas 中最高
+- 中山區與信義區分別佔 11.83% 與 11.05%
+- Top 3 areas（大安區、中山區、信義區）合計佔 43.35% 的 network activity
+- 若再加入中正區與松山區，Top 5 areas 合計佔 60.92%
+- 文山區的 activity share 最低，為 3.55%；南港區與北投區亦低於 5%
+- YouBike rental/return activity 並非平均分布在各 area，而是較集中於少數高活動量區域。
+- 大安區不僅在絕對 total activity 上排名第一，也單獨占整體 network activity 約五分之一。
+- 結合 Query 2 可看出，大安區的高 network share 不只是因為 active station 數多，其平均每站活動量同樣居前。
+- `network_activity_share_pct` 的 denominator 為 origin 與 destination 都成功匹配的 75,227,767 筆 trips 所產生的 150,455,534 次 rental/return events。
+- Share 反映的是 activity event 的分布，不代表人口、土地面積、需求強度或服務效率。
+- 本分析中的 area 為資料來源定義的分類，包含獨立的「臺大公館校區」，因此不完全等同於官方行政區。

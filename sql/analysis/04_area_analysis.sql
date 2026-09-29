@@ -96,3 +96,51 @@ SELECT
 FROM area_activity 
 ORDER BY 
     avg_activity_per_active_station DESC; 
+
+-- 3. Area share of total network activity
+WITH matched_trips AS (
+    SELECT 
+        origin_station_id, 
+        destination_station_id
+    FROM dbo.fact_trips
+    WHERE origin_station_id IS NOT NULL
+        AND destination_station_id IS NOT NULL
+), 
+rental_activity AS (
+    SELECT 
+        s.area, 
+        COUNT(*) AS rental_trips
+    FROM matched_trips f
+    JOIN dbo.station_reference s
+        ON f.origin_station_id = s.station_id
+    GROUP BY s.area
+), 
+return_activity AS (
+    SELECT 
+        s.area, 
+        COUNT(*) AS return_trips
+    FROM matched_trips f
+    JOIN dbo.station_reference s
+        ON f.destination_station_id = s.station_id
+    GROUP BY s.area
+), 
+area_activity AS (
+    SELECT 
+        COALESCE(r.area, d.area) AS area, 
+        COALESCE(r.rental_trips, 0) AS rental_trips,
+        COALESCE(d.return_trips, 0) AS return_trips, 
+        COALESCE(r.rental_trips, 0) + COALESCE(d.return_trips, 0) AS total_activity
+    FROM rental_activity r
+    FULL OUTER JOIN return_activity d
+        ON r.area = d.area
+)
+SELECT 
+    area, 
+    rental_trips, 
+    return_trips, 
+    total_activity, 
+    CAST(
+        total_activity * 100.0 / SUM(total_activity) OVER () AS decimal(5, 2)
+    ) AS network_activity_share_pct
+FROM area_activity 
+ORDER BY total_activity DESC; 
