@@ -234,12 +234,12 @@
 
 ### 9. Weekday vs Weekend 熱門路線重疊程度
 
-- Weekday Top 20 與 Weekend Top 20 directed OD routes 中共有 18 條重疊，重疊率為 90%。
-- 這表示最高流量的 station-to-station connections 在平日與週末之間具有高度穩定性，只有少數路線會因 day type 而進出 Top 20。
-- 相較於 Morning / Evening analysis 中較明顯的方向與排名變化，Weekday / Weekend 的熱門 OD 結構更加穩定。
-- Day type 對個別 route 的平均每日流量與排名仍有影響，但對 Top 20 route 組成的影響相對有限。
-- 90% 指的是 Weekday Top 20 directed routes 中，有 18 條也出現在 Weekend Top 20，不代表全體 OD routes 有 90% 相同。
-- Top 20 overlap 衡量的是熱門 route 組成的穩定性，不代表同一 route 在 weekday 與 weekend 的流量完全一致。
+- Weekday Top 20 與 Weekend Top 20 directed OD routes 中共有 15 條重疊，重疊率為 75%。
+- 這表示熱門 station-to-station connections 在平日與週末之間仍具有相當程度的穩定性，但並非高度一致；有 5 條 Weekday Top 20 routes 未出現在 Weekend Top 20。
+- 相較於 Morning / Evening analysis 中的方向反轉現象，Weekday / Weekend 的差異主要反映熱門 route 組成與排名的變化。
+- Day type 對部分熱門 OD connections 的相對重要性具有明顯影響，因此 weekday/weekend segmentation 能補充全年 aggregate 所看不到的差異。
+- 75% 指的是 Weekday Top 20 directed routes 中，有 15 條也出現在 Weekend Top 20，不代表全體 OD routes 有 75% 相同。
+- Top 20 overlap 衡量的是熱門 route 組成的重疊程度，不代表同一 route 在 weekday 與 weekend 的流量相同。
 
 ## 04
 
