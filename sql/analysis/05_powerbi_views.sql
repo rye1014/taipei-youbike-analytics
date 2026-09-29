@@ -156,3 +156,151 @@ SELECT
     ) AS monthly_share_pct
 FROM monthly_bike_counts; 
 GO
+
+
+-------------------------------------------------------
+
+-- 7. Station activity and directional imbalance
+CREATE OR ALTER VIEW dbo.vw_station_activity AS 
+
+WITH rental_activity AS (
+    SELECT 
+        origin_station_id AS station_id, 
+        COUNT_BIG(*) AS rental_trips
+    FROM dbo.fact_trips
+    WHERE origin_station_id IS NOT NULL
+    GROUP BY origin_station_id
+), 
+return_activity AS (
+    SELECT
+        destination_station_id AS station_id, 
+        COUNT_BIG(*) AS return_trips
+    FROM dbo.fact_trips
+    WHERE destination_station_id IS NOT NULL
+    GROUP BY destination_station_id
+), 
+station_activity AS (
+    SELECT 
+        COALESCE(r.station_id, d.station_id) AS station_id, 
+        COALESCE(r.rental_trips, 0) AS rental_trips, 
+        COALESCE(d.return_trips, 0) AS return_trips
+    FROM rental_activity r
+    FULL OUTER JOIN return_activity d
+        ON r.station_id = d.station_id
+)
+SELECT 
+    a.station_id, 
+    s.station_name, 
+    s.area, 
+    a.rental_trips, 
+    a.return_trips, 
+    a.rental_trips + a.return_trips AS total_activity, 
+    a.return_trips - a.rental_trips AS net_flow, 
+    ABS(a.return_trips - a.rental_trips) AS absolute_imbalance, 
+    CAST(
+        ABS(a.return_trips - a.rental_trips) * 100.0 / NULLIF(a.rental_trips + a.return_trips, 0) AS decimal(6, 2)
+    ) AS relative_imbalance_pct
+FROM station_activity a
+JOIN dbo.station_reference s
+    ON a.station_id = s.station_id; 
+GO
+
+-- 8. Station hourly flow
+CREATE OR ALTER VIEW dbo.vw_station_hourly_flow AS 
+
+WITH hours AS (
+    SELECT hour_of_day
+    FROM (
+        VALUES 
+            (0), (1), (2), (3), (4), (5), 
+            (6), (7), (8), (9), (10), (11), 
+            (12), (13), (14), (15), (16), (17), 
+            (18), (19), (20), (21), (22), (23)
+    ) AS h(hour_of_day)
+), 
+active_stations AS (
+    SELECT 
+        station_id, 
+        station_name, 
+        area
+    FROM dbo.vw_station_activity
+), 
+rental_hourly AS (
+    SELECT 
+        origin_station_id AS station_id, 
+        DATEPART(hour, rent_time) AS hour_of_day, 
+        COUNT_BIG(*) AS rental_trips
+    FROM dbo.fact_trips
+    WHERE origin_station_id IS NOT NULL
+        AND rent_time IS NOT NULL
+    GROUP BY 
+        origin_station_id, 
+        DATEPART(hour, rent_time)
+), 
+return_hourly AS (
+    SELECT 
+        destination_station_id AS station_id, 
+        DATEPART(hour, return_time) AS hour_of_day, 
+        COUNT_BIG(*) AS return_trips
+    FROM dbo.fact_trips
+    WHERE destination_station_id IS NOT NULL
+        AND return_time IS NOT NULL
+    GROUP BY 
+        destination_station_id, 
+        DATEPART(hour, return_time)
+)
+SELECT 
+    s.station_id, 
+    s.station_name, 
+    s.area, 
+    h.hour_of_day, 
+    COALESCE(r.rental_trips, 0) AS rental_trips, 
+    COALESCE(d.return_trips, 0) AS return_trips, 
+    COALESCE(r.rental_trips, 0) + COALESCE(d.return_trips, 0) AS total_activity, 
+    COALESCE(d.return_trips, 0) - COALESCE(r.rental_trips, 0) AS net_flow
+FROM active_stations s
+CROSS JOIN hours AS h
+LEFT JOIN rental_hourly AS r
+    ON s.station_id = r.station_id
+        AND h.hour_of_day = r.hour_of_day
+LEFT JOIN return_hourly AS d
+    ON s.station_id = d.station_id
+        AND h.hour_of_day = d.hour_of_day; 
+GO
+
+-- 9. Station peak-period flow
+CREATE OR ALTER VIEW dbo.vw_station_peak_flow AS 
+
+WITH peak_hours AS (
+    SELECT 
+        station_id, 
+        station_name, 
+        area, 
+        CASE
+            WHEN hour_of_day BETWEEN 7 AND 9
+                THEN 'Morning'
+            WHEN hour_of_day BETWEEN 17 AND 19
+                THEN 'Evening'
+        END AS peak_period, 
+        rental_trips, 
+        return_trips
+    FROM dbo.vw_station_hourly_flow
+    WHERE hour_of_day BETWEEN 7 AND 9
+        OR hour_of_day BETWEEN 17 AND 19
+)
+SELECT 
+    station_id, 
+    station_name, 
+    area, 
+    peak_period, 
+    SUM(rental_trips) AS rental_trips, 
+    SUM(return_trips) AS return_trips, 
+    SUM(rental_trips) + SUM(return_trips) AS total_activity, 
+    SUM(return_trips) - SUM(rental_trips) AS net_flow
+FROM peak_hours
+GROUP BY 
+    station_id, 
+    station_name, 
+    area, 
+    peak_period; 
+GO
