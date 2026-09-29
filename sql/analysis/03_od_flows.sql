@@ -1,6 +1,10 @@
 USE TaipeiYouBikeAnalytics;
 GO
 
+-- Mon = 1, Sun = 7
+SET DATEFIRST 1;
+GO
+
 -- 1. Top OD routes
 SELECT TOP 20
     o.station_id AS origin_station_id,

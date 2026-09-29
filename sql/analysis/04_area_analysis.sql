@@ -1,3 +1,10 @@
+USE TaipeiYouBikeAnalytics;
+GO
+
+-- Mon = 1, Sun = 7
+SET DATEFIRST 1;
+GO
+
 -- 1. Area-level rental and return activity
 WITH matched_trips AS (
     SELECT

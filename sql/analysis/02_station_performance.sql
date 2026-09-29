@@ -1,6 +1,10 @@
 USE TaipeiYouBikeAnalytics;
 GO
 
+-- Mon = 1, Sun = 7
+SET DATEFIRST 1;
+GO
+
 -- 1. Top rental stations
 SELECT TOP 20
     s.station_id,
