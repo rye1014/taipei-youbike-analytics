@@ -1,3 +1,6 @@
+-- Station-level rental and return activity are counted independently by successfully matched endpoint. 
+-- A trip can contribute to rental activity if the origin station is matched, even when the destination station is unmatched, and vice versa for returns. 
+
 USE TaipeiYouBikeAnalytics;
 GO
 

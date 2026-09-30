@@ -1,3 +1,6 @@
+-- Area-level analyses includes only trips where both origin and destination stations are successfully matched to station_reference. 
+-- This differs from 02_station_performance.sql, where rental and return activity are counted independently by matched endpoint. 
+
 USE TaipeiYouBikeAnalytics;
 GO
 
