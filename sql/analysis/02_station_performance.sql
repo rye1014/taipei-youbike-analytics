@@ -18,7 +18,9 @@ GROUP BY
     s.station_id,
     s.station_name,
     s.area
-ORDER BY rental_count DESC;
+ORDER BY 
+    rental_count DESC, 
+    station_id;
 
 -- 2. Top return stations
 SELECT TOP 20
@@ -33,7 +35,9 @@ GROUP BY
     s.station_id,
     s.station_name,
     s.area
-ORDER BY return_count DESC;
+ORDER BY 
+    return_count DESC, 
+    station_id;
 
 -- 3. Top rental / return overlap
 WITH rental_counts AS (
@@ -150,7 +154,9 @@ SELECT TOP 20
     ABS(return_count - rental_count) As absolute_imbalance
 FROM station_activity
 WHERE rental_count + return_count > 0
-ORDER BY absolute_imbalance DESC;
+ORDER BY 
+    absolute_imbalance DESC, 
+    station_id;
 
 -- 6. Relative directional imbalance
 WITH rentals AS (
@@ -195,7 +201,9 @@ SELECT TOP 20
     ) AS relative_imbalance_pct
 FROM station_activity
 WHERE rental_count + return_count >= 100000
-ORDER BY relative_imbalance_pct DESC; 
+ORDER BY 
+    relative_imbalance_pct DESC, 
+    station_id; 
 
 -- 7. Hourly rental / return patterns for Top 10 stations
 WITH hourly_rentals AS (
