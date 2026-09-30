@@ -94,12 +94,12 @@ CREATE OR ALTER VIEW dbo.vw_duration_distribution AS
 WITH duration_buckets AS (
     SELECT 
         CASE 
-            WHEN trip_duration_seconds < 300     THEN '<5 min'
-            WHEN trip_duration_seconds < 600     THEN '5-10 min'
-            WHEN trip_duration_seconds < 1200    THEN '10-20 min'
-            WHEN trip_duration_seconds < 1800    THEN '20-30 min'
-            WHEN trip_duration_seconds < 3600    THEN '30-60 min'
-            ELSE '60+ min'
+            WHEN trip_duration_seconds < 300     THEN '<5 min' -- [0, 5) min
+            WHEN trip_duration_seconds < 600     THEN '5-10 min' -- [5, 10) min
+            WHEN trip_duration_seconds < 1200    THEN '10-20 min' -- [10, 20) min
+            WHEN trip_duration_seconds < 1800    THEN '20-30 min' -- [20, 30) min
+            WHEN trip_duration_seconds < 3600    THEN '30-60 min' -- [30, 60) min
+            ELSE '60+ min' -- >= 60 min
         END AS duration_bucket, 
         CASE 
             WHEN trip_duration_seconds < 300     THEN 1

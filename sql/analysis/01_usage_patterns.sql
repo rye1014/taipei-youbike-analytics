@@ -136,12 +136,12 @@ WITH duration_buckets AS (
             ELSE 6
         END AS duration_order,
         CASE 
-            WHEN trip_duration_seconds < 5 * 60 THEN '< 5 min'
-            WHEN trip_duration_seconds < 10 * 60 THEN '5-10 min'
-            WHEN trip_duration_seconds < 20 * 60 THEN '10-20 min'
-            WHEN trip_duration_seconds < 30 * 60 THEN '20-30 min'
-            WHEN trip_duration_seconds < 60 * 60 THEN '30-60 min'
-            ELSE '60+ min'
+            WHEN trip_duration_seconds < 5 * 60 THEN '<5 min' -- [0, 5) min
+            WHEN trip_duration_seconds < 10 * 60 THEN '5-10 min' -- [5, 10) min
+            WHEN trip_duration_seconds < 20 * 60 THEN '10-20 min' -- [10, 20) min
+            WHEN trip_duration_seconds < 30 * 60 THEN '20-30 min' -- [20, 30) min
+            WHEN trip_duration_seconds < 60 * 60 THEN '30-60 min' -- [30, 60) min
+            ELSE '60+ min' -- >= 60 min
         END AS duration_group
     FROM dbo.fact_trips
     WHERE duration_parse_failed = 0
