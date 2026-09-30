@@ -304,3 +304,379 @@ GROUP BY
     area, 
     peak_period; 
 GO
+
+
+-------------------------------------------------------
+
+
+-- 10. Directed OD route summary
+CREATE OR ALTER VIEW dbo.vw_od_routes AS 
+
+SELECT 
+    f.origin_station_id, 
+    o.station_name AS origin_station_name, 
+    o.area AS origin_area, 
+    f.destination_station_id, 
+    d.station_name AS destination_station_name, 
+    d.area AS destination_area, 
+    COUNT_BIG(*) AS trip_count
+FROM dbo.fact_trips f
+JOIN dbo.station_reference o
+    ON f.origin_station_id = o.station_id
+JOIN dbo.station_reference d
+    ON f.destination_station_id = d.station_id 
+WHERE f.origin_station_id IS NOT NULL
+    AND f.destination_station_id IS NOT NULL
+    AND f.origin_station_id <> f.destination_station_id
+GROUP BY 
+    f.origin_station_id, 
+    o.station_name, 
+    o.area, 
+    f.destination_station_id, 
+    d.station_name, 
+    d.area; 
+GO
+
+-- 11. Bidirectional station pair summary
+CREATE OR ALTER VIEW dbo.vw_station_pairs AS 
+
+WITH pair_activity AS (
+    SELECT 
+        CASE 
+            WHEN origin_station_id < destination_station_id
+                THEN origin_station_id
+            ELSE destination_station_id
+        END AS station_1_id, 
+        CASE 
+            WHEN origin_station_id < destination_station_id
+                THEN destination_station_id
+            ELSE origin_station_id
+        END AS station_2_id, 
+        SUM(
+            CASE
+                WHEN origin_station_id < destination_station_id
+                    THEN trip_count
+                ELSE 0
+            END
+        ) AS station_1_to_2_trips, 
+        SUM(
+            CASE 
+                WHEN origin_station_id > destination_station_id 
+                    THEN trip_count
+                ELSE 0
+            END
+        ) AS station_2_to_1_trips
+    FROM dbo.vw_od_routes
+    GROUP BY 
+        CASE 
+            WHEN origin_station_id < destination_station_id
+                THEN origin_station_id
+            ELSE destination_station_id
+        END, 
+        CASE 
+            WHEN origin_station_id < destination_station_id
+                THEN destination_station_id
+            ELSE origin_station_id
+        END
+)
+SELECT
+    p.station_1_id, 
+    s1.station_name AS station_1_name, 
+    s1.area AS station_1_area, 
+    p.station_2_id, 
+    s2.station_name AS station_2_name, 
+    s2.area AS station_2_area, 
+    p.station_1_to_2_trips, 
+    p.station_2_to_1_trips, 
+    p.station_1_to_2_trips + p.station_2_to_1_trips AS total_pair_trips, 
+    ABS(
+        p.station_1_to_2_trips - p.station_2_to_1_trips
+    ) AS directional_difference, 
+    CAST(
+        ABS(
+            p.station_1_to_2_trips - p.station_2_to_1_trips
+        ) * 100.0 
+        / NULLIF(
+            p.station_1_to_2_trips + p.station_2_to_1_trips, 0
+        ) AS decimal(6, 2)
+    ) AS directional_imbalance_pct
+FROM pair_activity p
+JOIN dbo.station_reference s1
+    ON p.station_1_id = s1.station_id
+JOIN dbo.station_reference s2
+    ON p.station_2_id = s2.station_id; 
+GO
+
+-- 12. Peak-period directed OD routes
+CREATE OR ALTER VIEW dbo.vw_peak_od_routes AS 
+
+SELECT 
+    CASE 
+        WHEN DATEPART(hour, f.rent_time) BETWEEN 7 AND 9
+            THEN 'Morning'
+        WHEN DATEPART(hour, f.rent_time) BETWEEN 17 AND 19
+            THEN 'Evening'
+    END AS peak_period, 
+    f.origin_station_id, 
+    o.station_name AS origin_station_name, 
+    o.area AS origin_area, 
+    f.destination_station_id, 
+    d.station_name AS destination_station_name, 
+    d.area AS destination_area, 
+    COUNT_BIG(*) AS trip_count
+FROM dbo.fact_trips f
+JOIN dbo.station_reference o
+    ON f.origin_station_id = o.station_id 
+JOIN dbo.station_reference d
+    ON f.destination_station_id = d.station_id
+WHERE f.origin_station_id IS NOT NULL
+    AND f.destination_station_id IS NOT NULL
+    AND f.origin_station_id <> f.destination_station_id
+    AND (
+        DATEPART(hour, f.rent_time) BETWEEN 7 AND 9
+        OR DATEPART(hour, f.rent_time) BETWEEN 17 AND 19
+    )
+GROUP BY 
+    CASE 
+        WHEN DATEPART(hour, f.rent_time) BETWEEN 7 AND 9
+            THEN 'Morning'
+        WHEN DATEPART(hour, f.rent_time) BETWEEN 17 AND 19
+            THEN 'Evening'
+    END, 
+    f.origin_station_id, 
+    o.station_name, 
+    o.area, 
+    f.destination_station_id, 
+    d.station_name, 
+    d.area; 
+GO
+
+-- 13. Weekday/weekend directed OD routes
+CREATE OR ALTER VIEW dbo.vw_day_type_od_routes AS
+
+WITH day_counts AS (
+    SELECT
+        CASE
+            WHEN DATEDIFF(day, '19000101', trip_date) % 7 BETWEEN 0 AND 4
+                THEN 'Weekday'
+            ELSE 'Weekend'
+        END AS day_type,
+        COUNT_BIG(*) AS number_of_days
+    FROM dbo.vw_daily_usage
+    GROUP BY
+        CASE
+            WHEN DATEDIFF(day, '19000101', trip_date) % 7 BETWEEN 0 AND 4
+                THEN 'Weekday'
+            ELSE 'Weekend'
+        END
+),
+route_counts AS (
+    SELECT
+        CASE
+            WHEN DATEDIFF(
+                day,
+                '19000101',
+                CAST(f.rent_time AS date)
+            ) % 7 BETWEEN 0 AND 4
+                THEN 'Weekday'
+            ELSE 'Weekend'
+        END AS day_type,
+
+        f.origin_station_id,
+        o.station_name AS origin_station_name,
+        o.area AS origin_area,
+
+        f.destination_station_id,
+        d.station_name AS destination_station_name,
+        d.area AS destination_area,
+
+        COUNT_BIG(*) AS trip_count
+
+    FROM dbo.fact_trips AS f
+
+    JOIN dbo.station_reference AS o
+        ON f.origin_station_id = o.station_id
+
+    JOIN dbo.station_reference AS d
+        ON f.destination_station_id = d.station_id
+
+    WHERE f.origin_station_id IS NOT NULL
+      AND f.destination_station_id IS NOT NULL
+      AND f.origin_station_id <> f.destination_station_id
+      AND f.rent_time IS NOT NULL
+
+    GROUP BY
+        CASE
+            WHEN DATEDIFF(
+                day,
+                '19000101',
+                CAST(f.rent_time AS date)
+            ) % 7 BETWEEN 0 AND 4
+                THEN 'Weekday'
+            ELSE 'Weekend'
+        END,
+        f.origin_station_id,
+        o.station_name,
+        o.area,
+        f.destination_station_id,
+        d.station_name,
+        d.area
+)
+SELECT
+    r.day_type,
+    r.origin_station_id,
+    r.origin_station_name,
+    r.origin_area,
+    r.destination_station_id,
+    r.destination_station_name,
+    r.destination_area,
+    r.trip_count,
+    d.number_of_days,
+    CAST(
+        r.trip_count * 1.0 / d.number_of_days
+        AS decimal(18,2)
+    ) AS avg_daily_trips
+FROM route_counts AS r
+JOIN day_counts AS d
+    ON r.day_type = d.day_type;
+GO
+
+-- 14. Area activity summary
+CREATE OR ALTER VIEW dbo.vw_area_activity AS 
+
+WITH origin_activity AS (
+    SELECT 
+        origin_station_id AS station_id, 
+        COUNT_BIG(*) AS rental_trips
+    FROM dbo.fact_trips
+    WHERE origin_station_id IS NOT NULL 
+        AND destination_station_id IS NOT NULL
+    GROUP BY origin_station_id
+), 
+destination_activity AS (
+    SELECT 
+        destination_station_id AS station_id, 
+        COUNT_BIG(*) AS return_trips
+    FROM dbo.fact_trips
+    WHERE origin_station_id IS NOT NULL 
+        AND destination_station_id IS NOT NULL
+    GROUP BY destination_station_id
+), 
+station_activity AS (
+    SELECT 
+        COALESCE(o.station_id, d.station_id) AS station_id, 
+        COALESCE(o.rental_trips, 0) AS rental_trips, 
+        COALESCE(d.return_trips, 0) AS return_trips
+    FROM origin_activity o
+    FULL OUTER JOIN destination_activity d
+        ON o.station_id = d.station_id
+), 
+area_activity AS (
+    SELECT 
+        s.area, 
+        COUNT_BIG(*) AS active_station_count, 
+        SUM(a.rental_trips) AS rental_trips, 
+        SUM(a.return_trips) AS return_trips, 
+        SUM(a.rental_trips + a.return_trips) AS total_activity 
+    FROM station_activity a
+    JOIN dbo.station_reference s
+        ON a.station_id = s.station_id
+    GROUP BY s.area
+)
+SELECT 
+    area, 
+    active_station_count, 
+    rental_trips, 
+    return_trips, 
+    total_activity, 
+    return_trips - rental_trips AS net_flow, 
+    CAST(
+        total_activity * 1.0 / active_station_count AS decimal(18, 2)
+    ) AS avg_activity_per_active_station, 
+    CAST(
+        total_activity * 100.0 / SUM(total_activity) OVER () AS decimal(5, 2)
+    ) AS network_activity_share_pct
+FROM area_activity; 
+GO
+
+-- 15. Directed area-to-area flows
+CREATE OR ALTER VIEW dbo.vw_area_flows AS 
+
+SELECT 
+    o.area AS origin_area, 
+    d.area AS destination_area, 
+    COUNT_BIG(*) AS trip_count
+FROM dbo.fact_trips f
+JOIN dbo.station_reference o
+    ON f.origin_station_id = o.station_id 
+JOIN dbo.station_reference d
+    ON f.destination_station_id = d.station_id 
+WHERE f.origin_station_id IS NOT NULL
+    AND f.destination_station_id IS NOT NULL
+    AND o.area <> d.area 
+GROUP BY 
+    o.area, 
+    d.area; 
+GO
+
+-- 16. Bidirectional area pair summary
+CREATE OR ALTER VIEW dbo.vw_area_pairs AS 
+
+WITH pair_activity AS (
+    SELECT 
+        CASE 
+            WHEN origin_area < destination_area
+                THEN origin_area
+            ELSE destination_area
+        END AS area_1,
+        CASE 
+            WHEN origin_area < destination_area
+                THEN destination_area
+            ELSE origin_area
+        END AS area_2,
+        SUM(
+            CASE
+                WHEN origin_area < destination_area
+                    THEN trip_count
+                ELSE 0
+            END
+        ) AS area_1_to_2_trips, 
+        SUM(
+            CASE
+                WHEN origin_area > destination_area
+                    THEN trip_count
+                ELSE 0
+            END
+        ) AS area_2_to_1_trips
+    FROM dbo.vw_area_flows
+    GROUP BY 
+        CASE 
+            WHEN origin_area < destination_area
+                THEN origin_area
+            ELSE destination_area
+        END,
+        CASE 
+            WHEN origin_area < destination_area
+                THEN destination_area
+            ELSE origin_area
+        END
+)
+SELECT 
+    area_1, 
+    area_2, 
+    area_1_to_2_trips, 
+    area_2_to_1_trips, 
+    area_1_to_2_trips + area_2_to_1_trips AS total_pair_trips, 
+    ABS(
+        area_1_to_2_trips - area_2_to_1_trips
+    ) AS directional_difference, 
+    CAST(
+        ABS(
+            area_1_to_2_trips - area_2_to_1_trips
+        ) * 100.0 
+        / NULLIF(
+            area_1_to_2_trips + area_2_to_1_trips, 0
+        ) AS decimal(6, 2)
+    ) AS directional_imbalance_pct
+FROM pair_activity; 
+GO
