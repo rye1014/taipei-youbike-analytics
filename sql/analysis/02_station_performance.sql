@@ -274,7 +274,11 @@ ORDER BY
     s.station_id,
     h.activity_hour;
 
--- 8. Morning vs evening peak directional patterns
+-- 8. Morning and evening peak flow for the 10 stations with the highest total activity across the full analysis period
+-- Peak period: 
+--   Morning: 7:00 - 9:00
+--   Evening: 17:00 - 19:00
+-- Include both weekdays and weekends
 WITH hourly_rentals AS (
     SELECT
         origin_station_id AS station_id,

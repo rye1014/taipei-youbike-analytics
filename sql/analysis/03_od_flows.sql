@@ -188,6 +188,9 @@ ORDER BY
     p.station_2_id; 
 
 -- 6. Top OD routes during morning and evening peak periods
+-- Peak period: 
+--   Morning: 7:00 - 9:00
+--   Evening: 17:00 - 19:00
 WITH peak_routes AS (
     SELECT 
         CASE  
