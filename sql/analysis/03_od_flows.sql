@@ -431,9 +431,9 @@ ranked_routes AS (
         *, 
         ROW_NUMBER() OVER (
             PARTITION BY day_type
-            ORDER BY 
-                avg_daily_trips DESC, 
-                origin_station_id, 
+            ORDER BY
+                trip_count DESC,
+                origin_station_id,
                 destination_station_id
         ) AS route_rank
     FROM route_averages
@@ -535,9 +535,9 @@ ranked_routes AS (
         *, 
         ROW_NUMBER() OVER (
             PARTITION BY day_type
-            ORDER BY 
-                avg_daily_trips DESC, 
-                origin_station_id, 
+            ORDER BY
+                trip_count DESC,
+                origin_station_id,
                 destination_station_id
         ) AS route_rank
     FROM route_averages
