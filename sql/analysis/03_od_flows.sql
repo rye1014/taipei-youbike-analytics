@@ -191,6 +191,7 @@ ORDER BY
 -- Peak period: 
 --   Morning: 07:00 <= time < 10:00
 --   Evening: 17:00 <= time < 20:00
+-- Includes both weekdays and weekends
 WITH peak_routes AS (
     SELECT 
         CASE  

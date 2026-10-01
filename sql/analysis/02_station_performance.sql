@@ -81,6 +81,7 @@ JOIN top_returns AS rt
 
 
 -- 4. Station activity and net flow
+-- Includes all stations in station_reference, inlcuding stations with zero observed activity in the analysis dataset
 -- net_flow is defined as returns - rentals and represents directional trip imbalance
 WITH rentals AS (
     SELECT

@@ -1,3 +1,5 @@
+-- Analysis period: 2025-03-01 to 2026-02-28
+
 USE TaipeiYouBikeAnalytics;
 GO
 
@@ -158,6 +160,7 @@ GROUP BY
 ORDER BY duration_order; 
 
 -- 8a. Overall usage by bike type
+-- Bike type information is available throughout the full analysis period. 
 SELECT
     bike_type,
     COUNT(*) AS trip_count,
