@@ -1,3 +1,6 @@
+USE TaipeiYouBikeAnalytics;
+GO
+
 -- 1. Daily usage
 CREATE OR ALTER VIEW dbo.vw_daily_usage AS 
 
@@ -269,6 +272,9 @@ LEFT JOIN return_hourly AS d
 GO
 
 -- 9. Station peak-period flow
+-- Peak period: 
+--   Morning: 07:00 <= time < 10:00
+--   Evening: 17:00 <= time < 20:00
 CREATE OR ALTER VIEW dbo.vw_station_peak_flow AS 
 
 WITH peak_hours AS (

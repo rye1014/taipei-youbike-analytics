@@ -88,7 +88,7 @@ SELECT TOP 20
     d.station_name AS destination_station_name, 
     d.area AS destination_area, 
 
-    COUNT(*) as trip_count
+    COUNT(*) AS trip_count
 
 FROM dbo.fact_trips f
 JOIN dbo.station_reference o
@@ -189,8 +189,8 @@ ORDER BY
 
 -- 6. Top OD routes during morning and evening peak periods
 -- Peak period: 
---   Morning: 7:00 - 9:00
---   Evening: 17:00 - 19:00
+--   Morning: 07:00 <= time < 10:00
+--   Evening: 17:00 <= time < 20:00
 WITH peak_routes AS (
     SELECT 
         CASE  

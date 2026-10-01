@@ -154,7 +154,7 @@ SELECT TOP 20
     return_count,
     rental_count + return_count AS total_activity,
     return_count - rental_count AS net_flow,
-    ABS(return_count - rental_count) As absolute_imbalance
+    ABS(return_count - rental_count) AS absolute_imbalance
 FROM station_activity
 WHERE rental_count + return_count > 0
 ORDER BY 
@@ -204,9 +204,10 @@ SELECT TOP 20
     ) AS relative_imbalance_pct
 FROM station_activity
 WHERE rental_count + return_count >= 100000
-ORDER BY 
-    relative_imbalance_pct DESC, 
-    station_id; 
+ORDER BY
+    ABS(return_count - rental_count) * 100.0
+        / NULLIF(rental_count + return_count, 0) DESC,
+    station_id;
 
 -- 7. Hourly rental / return patterns for Top 10 stations
 WITH hourly_rentals AS (
@@ -279,8 +280,8 @@ ORDER BY
 
 -- 8. Morning and evening peak flow for the 10 stations with the highest total activity across the full analysis period
 -- Peak period: 
---   Morning: 7:00 - 9:00
---   Evening: 17:00 - 19:00
+--   Morning: 07:00 <= time < 10:00
+--   Evening: 17:00 <= time < 20:00
 -- Include both weekdays and weekends
 WITH hourly_rentals AS (
     SELECT
