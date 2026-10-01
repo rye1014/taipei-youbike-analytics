@@ -201,7 +201,7 @@ SELECT
     a.return_trips - a.rental_trips AS net_flow, 
     ABS(a.return_trips - a.rental_trips) AS absolute_imbalance, 
     CAST(
-        ABS(a.return_trips - a.rental_trips) * 100.0 / NULLIF(a.rental_trips + a.return_trips, 0) AS decimal(6, 2)
+        ABS(a.return_trips - a.rental_trips) * 100.0 / NULLIF(a.rental_trips + a.return_trips, 0) AS decimal(18, 6)
     ) AS relative_imbalance_pct
 FROM station_activity a
 JOIN dbo.station_reference s

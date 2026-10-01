@@ -166,6 +166,7 @@ SELECT
         AS decimal(5,2)
     ) AS trip_share_pct
 FROM dbo.fact_trips
+WHERE bike_type IS NOT NULL
 GROUP BY bike_type
 ORDER BY trip_count DESC;
 
@@ -176,6 +177,7 @@ WITH monthly_bike_type_trips AS (
         bike_type,
         COUNT(*) AS trip_count
     FROM dbo.fact_trips
+    WHERE bike_type IS NOT NULL
     GROUP BY
         DATETRUNC(month, rent_time),
         bike_type
@@ -200,6 +202,7 @@ WITH daily_hourly AS (
         DATEPART(hour, rent_time) AS rent_hour,
         COUNT(*) AS trip_count
     FROM dbo.fact_trips
+    WHERE bike_type IS NOT NULL
     GROUP BY
         CAST(rent_time AS date),
         bike_type,
@@ -224,6 +227,7 @@ WITH hourly_trips AS (
         DATEPART(hour, rent_time) AS rent_hour,
         COUNT(*) AS trip_count
     FROM dbo.fact_trips
+    WHERE bike_type IS NOT NULL
     GROUP BY
         bike_type,
         DATEPART(hour, rent_time)
