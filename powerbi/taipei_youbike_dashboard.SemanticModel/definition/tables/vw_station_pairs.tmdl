@@ -1,0 +1,116 @@
+table vw_station_pairs
+	lineageTag: 7737bb7e-5af8-46c1-9d8b-0dc733ba47fe
+
+	column station_1_id
+		dataType: string
+		lineageTag: d4b36dd8-09f5-4f9a-a387-512a873bade3
+		summarizeBy: none
+		sourceColumn: station_1_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column station_1_name
+		dataType: string
+		lineageTag: 5d2ef06e-eec9-4d33-80b6-f5a35ed4c82e
+		summarizeBy: none
+		sourceColumn: station_1_name
+
+		annotation SummarizationSetBy = Automatic
+
+	column station_1_area
+		dataType: string
+		lineageTag: be6e1291-11c9-40a3-b1ea-5accd7435ca7
+		summarizeBy: none
+		sourceColumn: station_1_area
+
+		annotation SummarizationSetBy = Automatic
+
+	column station_2_id
+		dataType: string
+		lineageTag: 2bf20c7f-a457-49ad-b79e-3e5488f00681
+		summarizeBy: none
+		sourceColumn: station_2_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column station_2_name
+		dataType: string
+		lineageTag: 3f0db5b5-881d-4b7d-9cd2-e1d67b36d883
+		summarizeBy: none
+		sourceColumn: station_2_name
+
+		annotation SummarizationSetBy = Automatic
+
+	column station_2_area
+		dataType: string
+		lineageTag: de037b33-af1a-4034-8829-7c5db1e7d2e8
+		summarizeBy: none
+		sourceColumn: station_2_area
+
+		annotation SummarizationSetBy = Automatic
+
+	column station_1_to_2_trips
+		dataType: int64
+		formatString: 0
+		lineageTag: 49d5f13d-65eb-45b9-b88f-0657db49425d
+		summarizeBy: sum
+		sourceColumn: station_1_to_2_trips
+
+		annotation SummarizationSetBy = Automatic
+
+	column station_2_to_1_trips
+		dataType: int64
+		formatString: 0
+		lineageTag: e7cecac7-eafa-4c88-8597-1568d67ec1fd
+		summarizeBy: sum
+		sourceColumn: station_2_to_1_trips
+
+		annotation SummarizationSetBy = Automatic
+
+	column total_pair_trips
+		dataType: int64
+		formatString: 0
+		lineageTag: 811eeac1-89d1-4ae4-bd83-aff8db2b60ff
+		summarizeBy: sum
+		sourceColumn: total_pair_trips
+
+		annotation SummarizationSetBy = Automatic
+
+	column directional_difference
+		dataType: int64
+		formatString: 0
+		lineageTag: 55cc6e9c-9063-436a-a684-b82a779093c9
+		summarizeBy: sum
+		sourceColumn: directional_difference
+
+		annotation SummarizationSetBy = Automatic
+
+	column directional_imbalance_pct
+		dataType: double
+		lineageTag: db952ea6-2f74-42e2-95d8-ef266a207670
+		summarizeBy: sum
+		sourceColumn: directional_imbalance_pct
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column 'Station Pair' =
+			
+			vw_station_pairs[station_1_name]
+			    & " ↔ "
+			    & vw_station_pairs[station_2_name]
+		lineageTag: 009ff256-ca8e-45b6-9bdc-52082c7f7123
+		summarizeBy: none
+
+		annotation SummarizationSetBy = Automatic
+
+	partition vw_station_pairs = m
+		mode: import
+		source =
+				let
+				    Source = Sql.Database("YOUR_SQL_SERVER,1433", "TaipeiYouBikeAnalytics"),
+				    dbo_vw_station_pairs = Source{[Schema="dbo",Item="vw_station_pairs"]}[Data]
+				in
+				    dbo_vw_station_pairs
+

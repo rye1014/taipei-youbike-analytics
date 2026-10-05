@@ -1,0 +1,217 @@
+{
+  "version": "1.1.0",
+  "diagrams": [
+    {
+      "ordinal": 0,
+      "scrollPosition": {
+        "x": 3510.39990234375,
+        "y": 0
+      },
+      "nodes": [
+        {
+          "location": {
+            "x": 0,
+            "y": 90.129941727546765
+          },
+          "nodeIndex": "vw_bike_type_monthly",
+          "nodeLineageTag": "f94d76e7-bb49-433c-883b-e040527be42a",
+          "size": {
+            "height": 176,
+            "width": 234
+          },
+          "zIndex": 1
+        },
+        {
+          "location": {
+            "x": 284,
+            "y": 90.129941727546765
+          },
+          "nodeIndex": "vw_duration_distribution",
+          "nodeLineageTag": "ae325ebc-2987-48be-a413-3deb0b90733e",
+          "size": {
+            "height": 176,
+            "width": 234
+          },
+          "zIndex": 2
+        },
+        {
+          "location": {
+            "x": 568,
+            "y": 78.129941727546765
+          },
+          "nodeIndex": "vw_hourly_usage",
+          "nodeLineageTag": "2e0287ee-0921-4a3b-a9d0-2ecb2edb5086",
+          "size": {
+            "height": 200,
+            "width": 234
+          },
+          "zIndex": 3
+        },
+        {
+          "location": {
+            "x": 852,
+            "y": 90.129941727546765
+          },
+          "nodeIndex": "vw_monthly_usage",
+          "nodeLineageTag": "82e420b9-22ca-4d7b-a32a-21acb4a526d3",
+          "size": {
+            "height": 176,
+            "width": 234
+          },
+          "zIndex": 4
+        },
+        {
+          "location": {
+            "x": 1136,
+            "y": 78.129941727546765
+          },
+          "nodeIndex": "vw_network_kpis",
+          "nodeLineageTag": "e1f65174-49c0-4fad-9c6e-b61bc2818c99",
+          "size": {
+            "height": 200,
+            "width": 234
+          },
+          "zIndex": 5
+        },
+        {
+          "location": {
+            "x": 1754.18475118063,
+            "y": -17.065109177342038
+          },
+          "nodeIndex": "vw_station_activity",
+          "nodeLineageTag": "f8a4b4cf-fd79-4850-b40a-1d9c2103cff1",
+          "size": {
+            "height": 296,
+            "width": 234
+          },
+          "zIndex": 8
+        },
+        {
+          "location": {
+            "x": 2072.36163941536,
+            "y": 27
+          },
+          "nodeIndex": "vw_station_hourly_flow",
+          "nodeLineageTag": "c75cb27f-3900-4e1d-aca5-c5a3afaa8f79",
+          "size": {
+            "height": 272,
+            "width": 234
+          },
+          "zIndex": 6
+        },
+        {
+          "location": {
+            "x": 1415,
+            "y": 26
+          },
+          "nodeIndex": "vw_station_peak_flow",
+          "nodeLineageTag": "09121b87-6c10-471c-b248-44d7310f0dc5",
+          "size": {
+            "height": 272,
+            "width": 234
+          },
+          "zIndex": 7
+        },
+        {
+          "location": {
+            "x": 2690.36163941536,
+            "y": 5.0325545886710188
+          },
+          "nodeIndex": "vw_area_activity",
+          "nodeLineageTag": "9d5b797a-03e0-4102-98ed-2cdf29924ad6",
+          "size": {
+            "height": 272,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 2924.36163941536,
+            "y": 115.03255458867102
+          },
+          "nodeIndex": "vw_area_flows",
+          "nodeLineageTag": "c9aafe58-0877-4ac7-8a45-42e7f3965770",
+          "size": {
+            "height": 152,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 2406.36163941536,
+            "y": 17.032554588671019
+          },
+          "nodeIndex": "vw_area_pairs",
+          "nodeLineageTag": "89e593e2-1d19-41c4-9f45-9efee194cdd4",
+          "size": {
+            "height": 248,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 3208.36163941536,
+            "y": 41.032554588671019
+          },
+          "nodeIndex": "vw_day_type_od_routes",
+          "nodeLineageTag": "40ce9505-c3a4-4970-b5aa-b6513b79a331",
+          "size": {
+            "height": 300,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 3492.36163941536,
+            "y": 67.032554588671019
+          },
+          "nodeIndex": "vw_od_routes",
+          "nodeLineageTag": "4ab58e30-8497-435c-9020-22534185eec8",
+          "size": {
+            "height": 248,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 3776.36163941536,
+            "y": 55.032554588671019
+          },
+          "nodeIndex": "vw_peak_od_routes",
+          "nodeLineageTag": "40797163-b847-4a54-a66c-caea5ed2b60c",
+          "size": {
+            "height": 272,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 4060.36163941536,
+            "y": 41.032554588671019
+          },
+          "nodeIndex": "vw_station_pairs",
+          "nodeLineageTag": "7737bb7e-5af8-46c1-9d8b-0dc733ba47fe",
+          "size": {
+            "height": 300,
+            "width": 234
+          },
+          "zIndex": 0
+        }
+      ],
+      "name": "All tables",
+      "zoomValue": 100,
+      "pinKeyFieldsToTop": false,
+      "showExtraHeaderInfo": false,
+      "hideKeyFieldsWhenCollapsed": false,
+      "tablesLocked": false
+    }
+  ],
+  "selectedDiagram": "All tables",
+  "defaultDiagram": "All tables"
+}

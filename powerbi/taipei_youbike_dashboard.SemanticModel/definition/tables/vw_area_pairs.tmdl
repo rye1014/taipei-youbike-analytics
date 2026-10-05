@@ -1,0 +1,74 @@
+table vw_area_pairs
+	lineageTag: 89e593e2-1d19-41c4-9f45-9efee194cdd4
+
+	column area_1
+		dataType: string
+		lineageTag: 031bfcee-773a-4635-a774-e1fcad2e0c38
+		summarizeBy: none
+		sourceColumn: area_1
+
+		annotation SummarizationSetBy = Automatic
+
+	column area_2
+		dataType: string
+		lineageTag: 6c3fcf85-3639-47fb-846a-26446b3a8646
+		summarizeBy: none
+		sourceColumn: area_2
+
+		annotation SummarizationSetBy = Automatic
+
+	column area_1_to_2_trips
+		dataType: int64
+		formatString: 0
+		lineageTag: f2c72931-a2da-4a2f-a1b7-7217e7ed9a7e
+		summarizeBy: sum
+		sourceColumn: area_1_to_2_trips
+
+		annotation SummarizationSetBy = Automatic
+
+	column area_2_to_1_trips
+		dataType: int64
+		formatString: 0
+		lineageTag: 6a08a2af-558b-4103-ac5c-7266375ca47c
+		summarizeBy: sum
+		sourceColumn: area_2_to_1_trips
+
+		annotation SummarizationSetBy = Automatic
+
+	column total_pair_trips
+		dataType: int64
+		formatString: 0
+		lineageTag: 1e43328c-b5db-4974-9fbb-982e9dc02965
+		summarizeBy: sum
+		sourceColumn: total_pair_trips
+
+		annotation SummarizationSetBy = Automatic
+
+	column directional_difference
+		dataType: int64
+		formatString: 0
+		lineageTag: 7becfb16-5ac6-4dba-bfad-01303ec90bf5
+		summarizeBy: sum
+		sourceColumn: directional_difference
+
+		annotation SummarizationSetBy = Automatic
+
+	column directional_imbalance_pct
+		dataType: double
+		lineageTag: c746f7b8-695a-4a6b-88bb-cff8f92e927a
+		summarizeBy: sum
+		sourceColumn: directional_imbalance_pct
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	partition vw_area_pairs = m
+		mode: import
+		source =
+				let
+				    Source = Sql.Database("YOUR_SQL_SERVER,1433", "TaipeiYouBikeAnalytics"),
+				    dbo_vw_area_pairs = Source{[Schema="dbo",Item="vw_area_pairs"]}[Data]
+				in
+				    dbo_vw_area_pairs
+

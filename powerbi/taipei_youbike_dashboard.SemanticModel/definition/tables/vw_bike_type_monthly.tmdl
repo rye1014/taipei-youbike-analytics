@@ -1,0 +1,55 @@
+table vw_bike_type_monthly
+	lineageTag: f94d76e7-bb49-433c-883b-e040527be42a
+
+	column month_start
+		dataType: dateTime
+		formatString: yyyy-mm
+		lineageTag: 8d927e4d-934b-4166-98a8-3fd37d8673ad
+		summarizeBy: none
+		sourceColumn: month_start
+
+		variation Variation
+			isDefault
+			relationship: d01ba9ef-9a10-40a9-88ff-0b4c69a5c0a9
+			defaultHierarchy: LocalDateTable_db48ec9f-089a-47f5-a183-ce324c7a1f5b.'Date Hierarchy'
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isDateTimeCustom":true}
+
+	column bike_type
+		dataType: string
+		lineageTag: dfe7f2e0-b4e5-4690-a6f2-91fc3802479a
+		summarizeBy: none
+		sourceColumn: bike_type
+
+		annotation SummarizationSetBy = Automatic
+
+	column trip_count
+		dataType: int64
+		formatString: 0
+		lineageTag: 380de7c7-8b19-4a82-b717-e580ba842bf5
+		summarizeBy: sum
+		sourceColumn: trip_count
+
+		annotation SummarizationSetBy = Automatic
+
+	column monthly_share_pct
+		dataType: double
+		lineageTag: 9a869e0b-fe40-454b-8137-9eb9dde67a74
+		summarizeBy: sum
+		sourceColumn: monthly_share_pct
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	partition vw_bike_type_monthly = m
+		mode: import
+		source =
+				let
+				    Source = Sql.Database("YOUR_SQL_SERVER,1433", "TaipeiYouBikeAnalytics"),
+				    dbo_vw_bike_type_monthly = Source{[Schema="dbo",Item="vw_bike_type_monthly"]}[Data]
+				in
+				    dbo_vw_bike_type_monthly
+

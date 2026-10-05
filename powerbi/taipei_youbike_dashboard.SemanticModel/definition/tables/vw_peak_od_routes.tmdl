@@ -1,0 +1,87 @@
+table vw_peak_od_routes
+	lineageTag: 40797163-b847-4a54-a66c-caea5ed2b60c
+
+	column peak_period
+		dataType: string
+		lineageTag: b8b90e10-761f-41c3-926c-448496ded514
+		summarizeBy: none
+		sourceColumn: peak_period
+
+		annotation SummarizationSetBy = Automatic
+
+	column origin_station_id
+		dataType: string
+		lineageTag: aee826db-7efa-4868-8fe5-86bdedf92a19
+		summarizeBy: none
+		sourceColumn: origin_station_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column origin_station_name
+		dataType: string
+		lineageTag: d6f95ac8-7098-4ef8-8ec9-696d74fd282e
+		summarizeBy: none
+		sourceColumn: origin_station_name
+
+		annotation SummarizationSetBy = Automatic
+
+	column origin_area
+		dataType: string
+		lineageTag: 821f09ae-9a35-4fce-a2e2-93b2e3f20a51
+		summarizeBy: none
+		sourceColumn: origin_area
+
+		annotation SummarizationSetBy = Automatic
+
+	column destination_station_id
+		dataType: string
+		lineageTag: 7843a787-29f4-40b5-a6b7-7c4b9e13cf4a
+		summarizeBy: none
+		sourceColumn: destination_station_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column destination_station_name
+		dataType: string
+		lineageTag: 288df6ee-d2e7-4add-9993-4d615312b326
+		summarizeBy: none
+		sourceColumn: destination_station_name
+
+		annotation SummarizationSetBy = Automatic
+
+	column destination_area
+		dataType: string
+		lineageTag: 77de3858-080c-43ef-875e-df8410c2708b
+		summarizeBy: none
+		sourceColumn: destination_area
+
+		annotation SummarizationSetBy = Automatic
+
+	column trip_count
+		dataType: int64
+		formatString: 0
+		lineageTag: ed9f98e3-f634-4781-ad0d-4ed16577c2cd
+		summarizeBy: sum
+		sourceColumn: trip_count
+
+		annotation SummarizationSetBy = Automatic
+
+	column Route =
+			
+			vw_peak_od_routes[origin_station_name]
+			    & " → "
+			    & vw_peak_od_routes[destination_station_name]
+		lineageTag: 0f46f151-134c-424d-bd2f-febccbee4288
+		summarizeBy: none
+
+		annotation SummarizationSetBy = Automatic
+
+	partition vw_peak_od_routes = m
+		mode: import
+		source =
+				let
+				    Source = Sql.Database("YOUR_SQL_SERVER,1433", "TaipeiYouBikeAnalytics"),
+				    dbo_vw_peak_od_routes = Source{[Schema="dbo",Item="vw_peak_od_routes"]}[Data]
+				in
+				    dbo_vw_peak_od_routes
+

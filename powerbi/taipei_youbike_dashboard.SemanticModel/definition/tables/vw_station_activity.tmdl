@@ -1,0 +1,93 @@
+table vw_station_activity
+	lineageTag: f8a4b4cf-fd79-4850-b40a-1d9c2103cff1
+
+	column station_id
+		dataType: string
+		lineageTag: f2e55262-ff3b-4f12-a607-42db90cc28c1
+		summarizeBy: none
+		sourceColumn: station_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column station_name
+		dataType: string
+		lineageTag: a80a2e48-0802-46ad-8d77-ab5aa68f56aa
+		summarizeBy: none
+		sourceColumn: station_name
+
+		annotation SummarizationSetBy = Automatic
+
+	column area
+		dataType: string
+		lineageTag: 99fd2246-15fd-428a-ba19-aa9c8344776e
+		summarizeBy: none
+		sourceColumn: area
+
+		annotation SummarizationSetBy = Automatic
+
+	column rental_trips
+		dataType: int64
+		formatString: 0
+		lineageTag: 58bd1dec-9b4e-4e9d-b1f4-55529cab0126
+		summarizeBy: sum
+		sourceColumn: rental_trips
+
+		annotation SummarizationSetBy = Automatic
+
+	column return_trips
+		dataType: int64
+		formatString: 0
+		lineageTag: ea2ba554-9f9b-44c2-87d5-9ebce0008745
+		summarizeBy: sum
+		sourceColumn: return_trips
+
+		annotation SummarizationSetBy = Automatic
+
+	column total_activity
+		dataType: int64
+		formatString: 0
+		lineageTag: 6a2bef77-e48c-4aea-a8f4-352ef293e9aa
+		summarizeBy: sum
+		sourceColumn: total_activity
+
+		annotation SummarizationSetBy = Automatic
+
+	column net_flow
+		dataType: int64
+		formatString: 0
+		lineageTag: 27cc3b67-a097-4e2e-a0e6-2f049c0f9a97
+		summarizeBy: sum
+		sourceColumn: net_flow
+
+		annotation SummarizationSetBy = Automatic
+
+	column absolute_imbalance
+		dataType: int64
+		formatString: 0
+		lineageTag: e4970fd0-df86-4ea1-a81d-04a83e464302
+		summarizeBy: sum
+		sourceColumn: absolute_imbalance
+
+		annotation SummarizationSetBy = Automatic
+
+	column relative_imbalance_pct
+		dataType: double
+		lineageTag: e508a8ee-79cc-4adc-836d-515416d48186
+		summarizeBy: sum
+		sourceColumn: relative_imbalance_pct
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	partition vw_station_activity = m
+		mode: import
+		source =
+				let
+				    Source = Sql.Database("YOUR_SQL_SERVER,1433", "TaipeiYouBikeAnalytics"),
+				    dbo_vw_station_activity = Source{[Schema="dbo",Item="vw_station_activity"]}[Data]
+				in
+				    dbo_vw_station_activity
+
+	annotation PBI_ResultType = Exception
+

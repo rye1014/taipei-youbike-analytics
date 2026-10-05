@@ -1,0 +1,79 @@
+table vw_od_routes
+	lineageTag: 4ab58e30-8497-435c-9020-22534185eec8
+
+	column origin_station_id
+		dataType: string
+		lineageTag: a66dc1d9-7d57-467c-82fc-cd87ca1e80d7
+		summarizeBy: none
+		sourceColumn: origin_station_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column origin_station_name
+		dataType: string
+		lineageTag: 9aeae918-5c35-42ae-9418-f214ac1ee0db
+		summarizeBy: none
+		sourceColumn: origin_station_name
+
+		annotation SummarizationSetBy = Automatic
+
+	column origin_area
+		dataType: string
+		lineageTag: d7976cea-9b8b-43f7-a38b-a493fc707f9e
+		summarizeBy: none
+		sourceColumn: origin_area
+
+		annotation SummarizationSetBy = Automatic
+
+	column destination_station_id
+		dataType: string
+		lineageTag: 9e40c1f3-fa00-4899-ac0a-f0514aa59814
+		summarizeBy: none
+		sourceColumn: destination_station_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column destination_station_name
+		dataType: string
+		lineageTag: d38485d9-4351-4d79-9c80-d1937d0e8356
+		summarizeBy: none
+		sourceColumn: destination_station_name
+
+		annotation SummarizationSetBy = Automatic
+
+	column destination_area
+		dataType: string
+		lineageTag: c1f01e3c-4c8f-49cc-93c6-da65680e5e7b
+		summarizeBy: none
+		sourceColumn: destination_area
+
+		annotation SummarizationSetBy = Automatic
+
+	column trip_count
+		dataType: int64
+		formatString: 0
+		lineageTag: 5d567e8a-74c5-416d-a248-7946103fe807
+		summarizeBy: sum
+		sourceColumn: trip_count
+
+		annotation SummarizationSetBy = Automatic
+
+	column Route =
+			
+			vw_od_routes[origin_station_name]
+			    & " → "
+			    & vw_od_routes[destination_station_name]
+		lineageTag: 6b1d2168-fc90-4dd1-93f6-d5f40bc12c21
+		summarizeBy: none
+
+		annotation SummarizationSetBy = Automatic
+
+	partition vw_od_routes = m
+		mode: import
+		source =
+				let
+				    Source = Sql.Database("YOUR_SQL_SERVER,1433", "TaipeiYouBikeAnalytics"),
+				    dbo_vw_od_routes = Source{[Schema="dbo",Item="vw_od_routes"]}[Data]
+				in
+				    dbo_vw_od_routes
+

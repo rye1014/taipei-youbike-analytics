@@ -1,0 +1,96 @@
+table vw_day_type_od_routes
+	lineageTag: 40ce9505-c3a4-4970-b5aa-b6513b79a331
+
+	column day_type
+		dataType: string
+		lineageTag: 4f0a7ba0-9765-4c36-b4fc-3f0b63cf7527
+		summarizeBy: none
+		sourceColumn: day_type
+
+		annotation SummarizationSetBy = Automatic
+
+	column origin_station_id
+		dataType: string
+		lineageTag: 79c8e09f-17b8-43e7-8cea-1c820fb13aeb
+		summarizeBy: none
+		sourceColumn: origin_station_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column origin_station_name
+		dataType: string
+		lineageTag: 0408d87d-39a0-4edd-b343-4eff49950fea
+		summarizeBy: none
+		sourceColumn: origin_station_name
+
+		annotation SummarizationSetBy = Automatic
+
+	column origin_area
+		dataType: string
+		lineageTag: 1d7c8a5e-1055-4ea5-a0c3-27fa9208cb7f
+		summarizeBy: none
+		sourceColumn: origin_area
+
+		annotation SummarizationSetBy = Automatic
+
+	column destination_station_id
+		dataType: string
+		lineageTag: 963faa4d-efda-45b5-9ff5-a7a68ceb5132
+		summarizeBy: none
+		sourceColumn: destination_station_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column destination_station_name
+		dataType: string
+		lineageTag: cd595ca5-6c99-461d-9400-9e00403a4ee3
+		summarizeBy: none
+		sourceColumn: destination_station_name
+
+		annotation SummarizationSetBy = Automatic
+
+	column destination_area
+		dataType: string
+		lineageTag: 99e213cd-007d-4ff2-84ac-9c449815e244
+		summarizeBy: none
+		sourceColumn: destination_area
+
+		annotation SummarizationSetBy = Automatic
+
+	column trip_count
+		dataType: int64
+		formatString: 0
+		lineageTag: 59a3fe85-9233-4440-a38d-997b0e5418dd
+		summarizeBy: sum
+		sourceColumn: trip_count
+
+		annotation SummarizationSetBy = Automatic
+
+	column number_of_days
+		dataType: int64
+		formatString: 0
+		lineageTag: 355553c2-66c9-473e-8965-de17b6593d90
+		summarizeBy: sum
+		sourceColumn: number_of_days
+
+		annotation SummarizationSetBy = Automatic
+
+	column avg_daily_trips
+		dataType: double
+		lineageTag: e760d640-4c3c-4ca3-a81f-1774d87a5b08
+		summarizeBy: sum
+		sourceColumn: avg_daily_trips
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	partition vw_day_type_od_routes = m
+		mode: import
+		source =
+				let
+				    Source = Sql.Database("YOUR_SQL_SERVER,1433", "TaipeiYouBikeAnalytics"),
+				    dbo_vw_day_type_od_routes = Source{[Schema="dbo",Item="vw_day_type_od_routes"]}[Data]
+				in
+				    dbo_vw_day_type_od_routes
+

@@ -1,0 +1,72 @@
+table vw_network_kpis
+	lineageTag: e1f65174-49c0-4fad-9c6e-b61bc2818c99
+
+	column analysis_start_date
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: 1294ece9-d889-4847-85a7-b4eb3a57c449
+		summarizeBy: none
+		sourceColumn: analysis_start_date
+
+		variation Variation
+			isDefault
+			relationship: 0d2a004e-eb76-47e8-a286-eed0fb6f5c61
+			defaultHierarchy: LocalDateTable_badc7469-d539-4581-a18f-eb06cce5188c.'Date Hierarchy'
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column analysis_end_date
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: b950060e-25c4-4f90-88c2-adac758519bb
+		summarizeBy: none
+		sourceColumn: analysis_end_date
+
+		variation Variation
+			isDefault
+			relationship: a3308622-ad20-4456-8e04-eae49cc62774
+			defaultHierarchy: LocalDateTable_688daebf-2733-4d69-83fc-458ab1efbfdd.'Date Hierarchy'
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column active_days
+		dataType: int64
+		formatString: 0
+		lineageTag: cfe51415-2db9-4968-a550-b037d801d047
+		summarizeBy: sum
+		sourceColumn: active_days
+
+		annotation SummarizationSetBy = Automatic
+
+	column total_trips
+		dataType: int64
+		formatString: 0
+		lineageTag: a890d9fb-2e61-410c-916d-99209f6a5419
+		summarizeBy: sum
+		sourceColumn: total_trips
+
+		annotation SummarizationSetBy = Automatic
+
+	column avg_daily_trips
+		dataType: double
+		lineageTag: f88eda19-4544-4e3d-9397-2ec08e129498
+		summarizeBy: sum
+		sourceColumn: avg_daily_trips
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	partition vw_network_kpis = m
+		mode: import
+		source =
+				let
+				    Source = Sql.Database("YOUR_SQL_SERVER,1433", "TaipeiYouBikeAnalytics"),
+				    dbo_vw_network_kpis = Source{[Schema="dbo",Item="vw_network_kpis"]}[Data]
+				in
+				    dbo_vw_network_kpis
+

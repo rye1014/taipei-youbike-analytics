@@ -1,0 +1,50 @@
+relationship 0d2a004e-eb76-47e8-a286-eed0fb6f5c61
+	joinOnDateBehavior: datePartOnly
+	fromColumn: vw_network_kpis.analysis_start_date
+	toColumn: LocalDateTable_badc7469-d539-4581-a18f-eb06cce5188c.Date
+
+relationship a3308622-ad20-4456-8e04-eae49cc62774
+	joinOnDateBehavior: datePartOnly
+	fromColumn: vw_network_kpis.analysis_end_date
+	toColumn: LocalDateTable_688daebf-2733-4d69-83fc-458ab1efbfdd.Date
+
+relationship cfd3dd23-38f8-4684-a29c-ca460f3c25d8
+	joinOnDateBehavior: datePartOnly
+	fromColumn: vw_monthly_usage.month_start
+	toColumn: LocalDateTable_45d1b59f-b90a-4819-9a64-45642087f08e.Date
+
+relationship d01ba9ef-9a10-40a9-88ff-0b4c69a5c0a9
+	joinOnDateBehavior: datePartOnly
+	fromColumn: vw_bike_type_monthly.month_start
+	toColumn: LocalDateTable_db48ec9f-089a-47f5-a183-ce324c7a1f5b.Date
+
+relationship AutoDetected_f857d584-4034-4081-80e8-0c5ae1a292c7
+	fromColumn: vw_station_hourly_flow.station_id
+	toColumn: vw_station_activity.station_id
+
+relationship AutoDetected_5af80e28-8000-4c7f-8e14-5173f11f64a0
+	fromColumn: vw_station_peak_flow.station_id
+	toColumn: vw_station_activity.station_id
+
+relationship AutoDetected_9ba6cbcc-4901-4b1e-ae8f-3be02622f7f2
+	fromColumn: vw_station_activity.area
+	toColumn: vw_area_activity.area
+
+relationship AutoDetected_d0c19173-a80f-427d-a223-ec5bc16987e5
+	isActive: false
+	fromColumn: vw_station_hourly_flow.area
+	toColumn: vw_area_activity.area
+
+relationship AutoDetected_e9af7365-ff5e-4603-9c84-9a928e0e8804
+	isActive: false
+	fromColumn: vw_station_peak_flow.area
+	toColumn: vw_area_activity.area
+
+relationship AutoDetected_cb3f74e4-26e1-4e76-907b-8b0803910544
+	fromColumn: vw_station_pairs.station_1_id
+	toColumn: vw_station_activity.station_id
+
+relationship AutoDetected_df15b103-9930-4f5b-b6be-75f8f6dbf1be
+	fromColumn: vw_area_pairs.area_1
+	toColumn: vw_area_activity.area
+

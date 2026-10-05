@@ -1,0 +1,38 @@
+model Model
+	culture: en-US
+	defaultPowerBIDataSourceVersion: powerBI_V3
+	sourceQueryCulture: zh-TW
+	valueFilterBehavior: independent
+	dataAccessOptions
+		legacyRedirects
+		returnErrorValuesAsNull
+
+annotation __PBI_TimeIntelligenceEnabled = 1
+
+annotation PBI_QueryOrder = ["vw_network_kpis","vw_monthly_usage","vw_hourly_usage","vw_duration_distribution","vw_bike_type_monthly","vw_station_activity","vw_station_hourly_flow","vw_station_peak_flow","vw_od_routes","vw_area_pairs","vw_peak_od_routes","vw_day_type_od_routes","vw_area_activity","vw_area_flows","vw_station_pairs"]
+
+annotation PBI_ProTooling = ["DevMode"]
+
+ref table vw_network_kpis
+ref table DateTableTemplate_d681a367-ecbb-4816-9cda-f2d8ace09b84
+ref table LocalDateTable_badc7469-d539-4581-a18f-eb06cce5188c
+ref table LocalDateTable_688daebf-2733-4d69-83fc-458ab1efbfdd
+ref table vw_monthly_usage
+ref table LocalDateTable_45d1b59f-b90a-4819-9a64-45642087f08e
+ref table vw_hourly_usage
+ref table vw_duration_distribution
+ref table vw_bike_type_monthly
+ref table LocalDateTable_db48ec9f-089a-47f5-a183-ce324c7a1f5b
+ref table vw_station_activity
+ref table vw_station_hourly_flow
+ref table vw_station_peak_flow
+ref table vw_od_routes
+ref table vw_area_pairs
+ref table vw_peak_od_routes
+ref table vw_day_type_od_routes
+ref table vw_area_activity
+ref table vw_area_flows
+ref table vw_station_pairs
+
+ref cultureInfo en-US
+

@@ -1,0 +1,85 @@
+table vw_area_activity
+	lineageTag: 9d5b797a-03e0-4102-98ed-2cdf29924ad6
+
+	column area
+		dataType: string
+		lineageTag: ece9456d-a966-4366-ba21-ba855e1c0ef0
+		summarizeBy: none
+		sourceColumn: area
+
+		annotation SummarizationSetBy = Automatic
+
+	column active_station_count
+		dataType: int64
+		formatString: 0
+		lineageTag: 7e43a576-5813-45c1-afc9-56a23654d15e
+		summarizeBy: sum
+		sourceColumn: active_station_count
+
+		annotation SummarizationSetBy = Automatic
+
+	column rental_trips
+		dataType: int64
+		formatString: 0
+		lineageTag: c86e5c51-ec82-426d-8089-2e79d3a6ee2e
+		summarizeBy: sum
+		sourceColumn: rental_trips
+
+		annotation SummarizationSetBy = Automatic
+
+	column return_trips
+		dataType: int64
+		formatString: 0
+		lineageTag: f0fa82ac-3c07-4743-91fc-356b046cede6
+		summarizeBy: sum
+		sourceColumn: return_trips
+
+		annotation SummarizationSetBy = Automatic
+
+	column total_activity
+		dataType: int64
+		formatString: 0
+		lineageTag: c9891517-0c93-4e88-bc4b-cc2f897782e2
+		summarizeBy: sum
+		sourceColumn: total_activity
+
+		annotation SummarizationSetBy = Automatic
+
+	column net_flow
+		dataType: int64
+		formatString: 0
+		lineageTag: d9de068e-cfe5-4299-acae-e6240f611d36
+		summarizeBy: sum
+		sourceColumn: net_flow
+
+		annotation SummarizationSetBy = Automatic
+
+	column avg_activity_per_active_station
+		dataType: double
+		lineageTag: 99fdd1aa-88cc-4687-b192-f9f7a59c16c3
+		summarizeBy: sum
+		sourceColumn: avg_activity_per_active_station
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column network_activity_share_pct
+		dataType: double
+		lineageTag: 69446700-0973-4213-9f47-fa901e7a6318
+		summarizeBy: sum
+		sourceColumn: network_activity_share_pct
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	partition vw_area_activity = m
+		mode: import
+		source =
+				let
+				    Source = Sql.Database("YOUR_SQL_SERVER,1433", "TaipeiYouBikeAnalytics"),
+				    dbo_vw_area_activity = Source{[Schema="dbo",Item="vw_area_activity"]}[Data]
+				in
+				    dbo_vw_area_activity
+

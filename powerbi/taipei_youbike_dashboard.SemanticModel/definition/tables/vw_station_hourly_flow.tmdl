@@ -1,0 +1,83 @@
+table vw_station_hourly_flow
+	lineageTag: c75cb27f-3900-4e1d-aca5-c5a3afaa8f79
+
+	column station_id
+		dataType: string
+		lineageTag: 775b896a-6c1c-4ecd-a967-206ce1a1b323
+		summarizeBy: none
+		sourceColumn: station_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column station_name
+		dataType: string
+		lineageTag: 95b6c581-b5a5-4084-a76a-1f37a6aa6058
+		summarizeBy: none
+		sourceColumn: station_name
+
+		annotation SummarizationSetBy = Automatic
+
+	column area
+		dataType: string
+		lineageTag: 442f6565-d46b-4458-ae5b-e97f2777717f
+		summarizeBy: none
+		sourceColumn: area
+
+		annotation SummarizationSetBy = Automatic
+
+	column hour_of_day
+		dataType: int64
+		formatString: 0
+		lineageTag: 978472ba-ef96-4743-822a-d81e5658fd67
+		summarizeBy: sum
+		sourceColumn: hour_of_day
+
+		annotation SummarizationSetBy = Automatic
+
+	column rental_trips
+		dataType: int64
+		formatString: 0
+		lineageTag: 9fe393dc-db2b-48a3-98ac-8465d89046b4
+		summarizeBy: sum
+		sourceColumn: rental_trips
+
+		annotation SummarizationSetBy = Automatic
+
+	column return_trips
+		dataType: int64
+		formatString: 0
+		lineageTag: 8184a227-d8c7-46c7-99ac-876febd78673
+		summarizeBy: sum
+		sourceColumn: return_trips
+
+		annotation SummarizationSetBy = Automatic
+
+	column total_activity
+		dataType: int64
+		formatString: 0
+		lineageTag: 4ccb06e2-2cb9-42ce-86e4-e4711992f5e9
+		summarizeBy: sum
+		sourceColumn: total_activity
+
+		annotation SummarizationSetBy = Automatic
+
+	column net_flow
+		dataType: int64
+		formatString: 0
+		lineageTag: e9e3ce1c-0389-4157-99a4-d91765f40b28
+		summarizeBy: sum
+		sourceColumn: net_flow
+
+		annotation SummarizationSetBy = Automatic
+
+	partition vw_station_hourly_flow = m
+		mode: import
+		source =
+				let
+				    Source = Sql.Database("YOUR_SQL_SERVER,1433", "TaipeiYouBikeAnalytics"),
+				    dbo_vw_station_hourly_flow = Source{[Schema="dbo",Item="vw_station_hourly_flow"]}[Data]
+				in
+				    dbo_vw_station_hourly_flow
+
+	annotation PBI_ResultType = Exception
+

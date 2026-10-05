@@ -1,0 +1,82 @@
+table vw_station_peak_flow
+	lineageTag: 09121b87-6c10-471c-b248-44d7310f0dc5
+
+	column station_id
+		dataType: string
+		lineageTag: a2c3068d-8570-428d-90cd-265f210f8ad5
+		summarizeBy: none
+		sourceColumn: station_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column station_name
+		dataType: string
+		lineageTag: bfe2b266-ebd9-4809-8022-7d27ffc081dd
+		summarizeBy: none
+		sourceColumn: station_name
+
+		annotation SummarizationSetBy = Automatic
+
+	column area
+		dataType: string
+		lineageTag: d10be5b5-500c-431e-9a03-3930d3be8b7c
+		summarizeBy: none
+		sourceColumn: area
+
+		annotation SummarizationSetBy = Automatic
+
+	column peak_period
+		dataType: string
+		lineageTag: 7f9a98c4-14c6-4440-bb6d-3b5884e6a264
+		summarizeBy: none
+		sourceColumn: peak_period
+
+		annotation SummarizationSetBy = Automatic
+
+	column rental_trips
+		dataType: int64
+		formatString: 0
+		lineageTag: e4637d65-19e7-4574-a8e1-014cefb5ab0c
+		summarizeBy: sum
+		sourceColumn: rental_trips
+
+		annotation SummarizationSetBy = Automatic
+
+	column return_trips
+		dataType: int64
+		formatString: 0
+		lineageTag: 775173a0-5851-4d02-a37d-df3ae045454c
+		summarizeBy: sum
+		sourceColumn: return_trips
+
+		annotation SummarizationSetBy = Automatic
+
+	column total_activity
+		dataType: int64
+		formatString: 0
+		lineageTag: 7b7985d2-fa69-4581-8bcf-fbdd58fb5a01
+		summarizeBy: sum
+		sourceColumn: total_activity
+
+		annotation SummarizationSetBy = Automatic
+
+	column net_flow
+		dataType: int64
+		formatString: 0
+		lineageTag: 59514124-ae78-447d-9190-5594dde996ac
+		summarizeBy: sum
+		sourceColumn: net_flow
+
+		annotation SummarizationSetBy = Automatic
+
+	partition vw_station_peak_flow = m
+		mode: import
+		source =
+				let
+				    Source = Sql.Database("YOUR_SQL_SERVER,1433", "TaipeiYouBikeAnalytics"),
+				    dbo_vw_station_peak_flow = Source{[Schema="dbo",Item="vw_station_peak_flow"]}[Data]
+				in
+				    dbo_vw_station_peak_flow
+
+	annotation PBI_ResultType = Exception
+

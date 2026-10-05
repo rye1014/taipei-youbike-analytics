@@ -1,0 +1,58 @@
+table vw_monthly_usage
+	lineageTag: 82e420b9-22ca-4d7b-a32a-21acb4a526d3
+
+	column month_start
+		dataType: dateTime
+		formatString: yyyy-mm
+		lineageTag: acf9f505-f794-45c8-9d77-1299e02c3ae2
+		summarizeBy: none
+		sourceColumn: month_start
+
+		variation Variation
+			isDefault
+			relationship: cfd3dd23-38f8-4684-a29c-ca460f3c25d8
+			defaultHierarchy: LocalDateTable_45d1b59f-b90a-4819-9a64-45642087f08e.'Date Hierarchy'
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+		annotation PBI_FormatHint = {"isDateTimeCustom":true}
+
+	column trip_count
+		dataType: int64
+		formatString: 0
+		lineageTag: 09cfca6a-bc1b-43b8-be07-6cb497b6606f
+		summarizeBy: sum
+		sourceColumn: trip_count
+
+		annotation SummarizationSetBy = Automatic
+
+	column active_days
+		dataType: int64
+		formatString: 0
+		lineageTag: db9da8c1-a663-4f65-9603-13fc4e239f31
+		summarizeBy: sum
+		sourceColumn: active_days
+
+		annotation SummarizationSetBy = Automatic
+
+	column avg_daily_trips
+		dataType: double
+		lineageTag: 83b66188-50b4-42a4-a46b-14042ded1fe9
+		summarizeBy: sum
+		sourceColumn: avg_daily_trips
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	partition vw_monthly_usage = m
+		mode: import
+		source =
+				let
+				    Source = Sql.Database("YOUR_SQL_SERVER,1433", "TaipeiYouBikeAnalytics"),
+				    dbo_vw_monthly_usage = Source{[Schema="dbo",Item="vw_monthly_usage"]}[Data]
+				in
+				    dbo_vw_monthly_usage
+

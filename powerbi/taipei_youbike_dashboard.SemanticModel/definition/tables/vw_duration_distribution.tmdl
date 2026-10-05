@@ -1,0 +1,51 @@
+table vw_duration_distribution
+	lineageTag: ae325ebc-2987-48be-a413-3deb0b90733e
+
+	column duration_bucket
+		dataType: string
+		lineageTag: e8c13770-bb7e-4629-af89-6d598197552f
+		summarizeBy: none
+		sourceColumn: duration_bucket
+		sortByColumn: bucket_order
+
+		changedProperty = SortByColumn
+
+		annotation SummarizationSetBy = Automatic
+
+	column bucket_order
+		dataType: int64
+		formatString: 0
+		lineageTag: 2c440210-32dc-4304-885c-18ecefff8bf2
+		summarizeBy: sum
+		sourceColumn: bucket_order
+
+		annotation SummarizationSetBy = Automatic
+
+	column trip_count
+		dataType: int64
+		formatString: 0
+		lineageTag: aa347234-4a48-4b1c-a3d6-550716b2b0d7
+		summarizeBy: sum
+		sourceColumn: trip_count
+
+		annotation SummarizationSetBy = Automatic
+
+	column trip_share_pct
+		dataType: double
+		lineageTag: b624ccba-7bb1-4d70-9927-dee15e12f9bd
+		summarizeBy: sum
+		sourceColumn: trip_share_pct
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	partition vw_duration_distribution = m
+		mode: import
+		source =
+				let
+				    Source = Sql.Database("YOUR_SQL_SERVER,1433", "TaipeiYouBikeAnalytics"),
+				    dbo_vw_duration_distribution = Source{[Schema="dbo",Item="vw_duration_distribution"]}[Data]
+				in
+				    dbo_vw_duration_distribution
+

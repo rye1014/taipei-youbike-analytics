@@ -1,0 +1,47 @@
+table vw_area_flows
+	lineageTag: c9aafe58-0877-4ac7-8a45-42e7f3965770
+
+	column origin_area
+		dataType: string
+		lineageTag: c1ba8f57-f459-4b83-bd86-fe9b8f8994df
+		summarizeBy: none
+		sourceColumn: origin_area
+
+		annotation SummarizationSetBy = Automatic
+
+	column destination_area
+		dataType: string
+		lineageTag: 6d91288d-c127-4ee7-9fce-daf8b1b473ab
+		summarizeBy: none
+		sourceColumn: destination_area
+
+		annotation SummarizationSetBy = Automatic
+
+	column trip_count
+		dataType: int64
+		formatString: 0
+		lineageTag: dadc110c-f564-41bf-acb2-d2f8d12d6a60
+		summarizeBy: sum
+		sourceColumn: trip_count
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Area Route' =
+			
+			vw_area_flows[origin_area]
+			    & " → "
+			    & vw_area_flows[destination_area]
+		lineageTag: fb101339-93c8-4bcc-a2fb-efb647adb07e
+		summarizeBy: none
+
+		annotation SummarizationSetBy = Automatic
+
+	partition vw_area_flows = m
+		mode: import
+		source =
+				let
+				    Source = Sql.Database("YOUR_SQL_SERVER,1433", "TaipeiYouBikeAnalytics"),
+				    dbo_vw_area_flows = Source{[Schema="dbo",Item="vw_area_flows"]}[Data]
+				in
+				    dbo_vw_area_flows
+
