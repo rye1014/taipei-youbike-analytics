@@ -9,3 +9,6 @@ __pycache__/
 .ipynb_checkpoints/
 *.pyc
 .env
+
+**/.pbi/localSettings.json
+**/.pbi/cache.abf
