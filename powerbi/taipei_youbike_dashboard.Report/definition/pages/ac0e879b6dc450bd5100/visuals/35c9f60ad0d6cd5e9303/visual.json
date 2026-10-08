@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.13.0/schema.json",
   "name": "35c9f60ad0d6cd5e9303",
   "position": {
-    "x": 138.03754493409667,
-    "y": 31.288510185061913,
+    "x": 32,
+    "y": 32,
     "z": 0,
-    "height": 119.63253894288378,
-    "width": 780.37225402742649,
+    "height": 96,
+    "width": 1856,
     "tabOrder": 0
   },
   "visual": {
@@ -21,7 +21,9 @@
                   {
                     "value": "Taipei YouBike Mobility Flow",
                     "textStyle": {
-                      "fontSize": "32pt"
+                      "fontFamily": "Segoe UI Semibold",
+                      "fontSize": "32pt",
+                      "color": "#172b4d"
                     }
                   }
                 ]
@@ -31,12 +33,76 @@
                   {
                     "value": "Mar 2025 – Feb 2026",
                     "textStyle": {
-                      "fontSize": "24pt"
+                      "fontFamily": "Segoe UI",
+                      "fontSize": "20pt",
+                      "color": "#526174"
                     }
                   }
                 ]
               }
             ]
+          }
+        }
+      ]
+    },
+    "visualContainerObjects": {
+      "background": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "border": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "padding": [
+        {
+          "properties": {
+            "top": {
+              "expr": {
+                "Literal": {
+                  "Value": "0D"
+                }
+              }
+            },
+            "bottom": {
+              "expr": {
+                "Literal": {
+                  "Value": "0D"
+                }
+              }
+            },
+            "left": {
+              "expr": {
+                "Literal": {
+                  "Value": "0D"
+                }
+              }
+            },
+            "right": {
+              "expr": {
+                "Literal": {
+                  "Value": "0D"
+                }
+              }
+            }
           }
         }
       ]

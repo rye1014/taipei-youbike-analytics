@@ -4,5 +4,73 @@
   "displayName": "Mobility Flow",
   "displayOption": "FitToPage",
   "height": 1080,
-  "width": 1920
+  "width": 1920,
+  "objects": {
+    "background": [
+      {
+        "properties": {
+          "color": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#F5F7FA'"
+                  }
+                }
+              }
+            }
+          },
+          "transparency": {
+            "expr": {
+              "Literal": {
+                "Value": "0D"
+              }
+            }
+          }
+        }
+      }
+    ]
+  },
+  "visualInteractions": [
+    {
+      "source": "19d8d629e60c006ec51c",
+      "target": "cbc1bca3a035bd6131ce",
+      "type": "NoFilter"
+    },
+    {
+      "source": "19d8d629e60c006ec51c",
+      "target": "496236d32399037218bd",
+      "type": "NoFilter"
+    },
+    {
+      "source": "19d8d629e60c006ec51c",
+      "target": "c8d22e30de0999d9dabe",
+      "type": "NoFilter"
+    },
+    {
+      "source": "19d8d629e60c006ec51c",
+      "target": "572d89c754831bd00946",
+      "type": "NoFilter"
+    },
+    {
+      "source": "572d89c754831bd00946",
+      "target": "19d8d629e60c006ec51c",
+      "type": "NoFilter"
+    },
+    {
+      "source": "572d89c754831bd00946",
+      "target": "cbc1bca3a035bd6131ce",
+      "type": "NoFilter"
+    },
+    {
+      "source": "572d89c754831bd00946",
+      "target": "496236d32399037218bd",
+      "type": "NoFilter"
+    },
+    {
+      "source": "572d89c754831bd00946",
+      "target": "c8d22e30de0999d9dabe",
+      "type": "NoFilter"
+    }
+  ]
 }

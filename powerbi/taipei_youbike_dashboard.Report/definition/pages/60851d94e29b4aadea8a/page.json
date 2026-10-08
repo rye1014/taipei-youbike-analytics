@@ -5,57 +5,127 @@
   "displayOption": "FitToPage",
   "height": 1080,
   "width": 1920,
-  "filterConfig": {
-    "filters": [
+  "objects": {
+    "background": [
       {
-        "name": "7ce37bc57d70a6450d47",
-        "field": {
-          "Column": {
-            "Expression": {
-              "SourceRef": {
-                "Entity": "vw_station_activity"
-              }
-            },
-            "Property": "total_activity"
-          }
-        },
-        "type": "Advanced",
-        "filter": {
-          "Version": 2,
-          "From": [
-            {
-              "Name": "v",
-              "Entity": "vw_station_activity",
-              "Type": 0
-            }
-          ],
-          "Where": [
-            {
-              "Condition": {
-                "Comparison": {
-                  "ComparisonKind": 2,
-                  "Left": {
-                    "Column": {
-                      "Expression": {
-                        "SourceRef": {
-                          "Source": "v"
-                        }
-                      },
-                      "Property": "total_activity"
-                    }
-                  },
-                  "Right": {
-                    "Literal": {
-                      "Value": "100000L"
-                    }
+        "properties": {
+          "color": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#F5F7FA'"
                   }
                 }
               }
             }
-          ]
-        },
-        "howCreated": "User"
+          },
+          "transparency": {
+            "expr": {
+              "Literal": {
+                "Value": "0D"
+              }
+            }
+          }
+        }
       }
     ]
-  }
+  },
+  "visualInteractions": [
+    {
+      "source": "7350f4e150a265d76110",
+      "target": "98f0322103baa10b1518",
+      "type": "NoFilter"
+    },
+    {
+      "source": "7350f4e150a265d76110",
+      "target": "f74eed0860de326d0db6",
+      "type": "NoFilter"
+    },
+    {
+      "source": "7350f4e150a265d76110",
+      "target": "102de5155a9540725227",
+      "type": "NoFilter"
+    },
+    {
+      "source": "7350f4e150a265d76110",
+      "target": "c05c873568e0104b0080",
+      "type": "DataFilter"
+    },
+    {
+      "source": "98f0322103baa10b1518",
+      "target": "102de5155a9540725227",
+      "type": "NoFilter"
+    },
+    {
+      "source": "98f0322103baa10b1518",
+      "target": "c05c873568e0104b0080",
+      "type": "NoFilter"
+    },
+    {
+      "source": "98f0322103baa10b1518",
+      "target": "7350f4e150a265d76110",
+      "type": "NoFilter"
+    },
+    {
+      "source": "98f0322103baa10b1518",
+      "target": "f74eed0860de326d0db6",
+      "type": "NoFilter"
+    },
+    {
+      "source": "f74eed0860de326d0db6",
+      "target": "98f0322103baa10b1518",
+      "type": "NoFilter"
+    },
+    {
+      "source": "f74eed0860de326d0db6",
+      "target": "102de5155a9540725227",
+      "type": "NoFilter"
+    },
+    {
+      "source": "f74eed0860de326d0db6",
+      "target": "c05c873568e0104b0080",
+      "type": "NoFilter"
+    },
+    {
+      "source": "f74eed0860de326d0db6",
+      "target": "7350f4e150a265d76110",
+      "type": "NoFilter"
+    },
+    {
+      "source": "102de5155a9540725227",
+      "target": "98f0322103baa10b1518",
+      "type": "NoFilter"
+    },
+    {
+      "source": "102de5155a9540725227",
+      "target": "f74eed0860de326d0db6",
+      "type": "NoFilter"
+    },
+    {
+      "source": "102de5155a9540725227",
+      "target": "c05c873568e0104b0080",
+      "type": "NoFilter"
+    },
+    {
+      "source": "102de5155a9540725227",
+      "target": "7350f4e150a265d76110",
+      "type": "NoFilter"
+    },
+    {
+      "source": "c05c873568e0104b0080",
+      "target": "98f0322103baa10b1518",
+      "type": "NoFilter"
+    },
+    {
+      "source": "c05c873568e0104b0080",
+      "target": "f74eed0860de326d0db6",
+      "type": "NoFilter"
+    },
+    {
+      "source": "c05c873568e0104b0080",
+      "target": "102de5155a9540725227",
+      "type": "NoFilter"
+    }
+  ]
 }
