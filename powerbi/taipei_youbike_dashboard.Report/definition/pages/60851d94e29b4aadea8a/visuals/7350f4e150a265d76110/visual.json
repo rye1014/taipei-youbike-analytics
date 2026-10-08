@@ -81,7 +81,7 @@
                           [
                             {
                               "Literal": {
-                                "Value": "'捷運公館站(2號出口)'"
+                                "Value": "'新和國小'"
                               }
                             }
                           ]
@@ -104,6 +104,44 @@
                 "Literal": {
                   "Value": "1D"
                 }
+              }
+            },
+            "selfFilter": {
+              "filter": {
+                "Version": 2,
+                "From": [
+                  {
+                    "Name": "v",
+                    "Entity": "vw_station_hourly_flow",
+                    "Type": 0
+                  }
+                ],
+                "Where": [
+                  {
+                    "Condition": {
+                      "Contains": {
+                        "Left": {
+                          "Column": {
+                            "Expression": {
+                              "SourceRef": {
+                                "Source": "v"
+                              }
+                            },
+                            "Property": "station_name"
+                          }
+                        },
+                        "Right": {
+                          "Literal": {
+                            "Value": "'新和'"
+                          }
+                        }
+                      }
+                    },
+                    "Annotations": {
+                      "PowerBI.MParameterBehavior": 1
+                    }
+                  }
+                ]
               }
             }
           }
