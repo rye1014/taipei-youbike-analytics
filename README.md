@@ -1,39 +1,47 @@
 # Taipei YouBike Usage & Station Performance Analytics
 
-## Project Overview
+## 1. Project Overview
 
-This project analyzes Taipei YouBike 2.0 trip records to understand usage patterns, station activity, directional imbalance, and urban mobility flows.
+This project analyzes Taipei YouBike 2.0 trip records to understand usage patterns, station activity, directional imbalance, and origin-destination flows. It covers approximately 77.4 million trip records from March 2025 to February 2026, a continuous 12-month analysis period. 
 
-The project builds a reproducible analytics pipeline using Python, Microsoft SQL Server, and Power BI.
+Python loads the source data into Microsoft SQL Server, where T-SQL handles trip data transformation, validation, and analysis. Power BI presents the results through a three-page interactive dashboard. 
 
-The primary analysis period is March 2025 to February 2026, providing a continuous 12-month window for seasonal and temporal analysis.
+The analysis focuses on four areas: 
 
-## Key Findings
+- **Usage Patterns:** How does ridership vary across months, days of the week, and hours of the day? What are the trip duration and bike-type usage patterns?
+- **Station Performance:** Which stations have the highest activity and the largest absolute or relative rental-return imbalances? How do rental and return flows vary by hour and between morning and evening peaks at the busiest stations?
+- **Origin-Destination Flows:** Which routes and station pairs carry the most trips, and how common are same-station returns? How do the top routes differ between morning and evening peaks and between weekdays and weekends?
+- **Area-Level Mobility:** How do areas compare in total activity and activity per active station? Which area pairs have the largest trip flows, and how balanced are the two directions?
 
-## Dashboard
+## 2. Dashboard
 
-## Business Questions
+The Power BI report presents the analysis across three pages. 
 
-The analysis focuses on four areas:
+[View the dashboard PDF](powerbi/taipei_youbike_dashboard.pdf)
 
-1. **Usage Patterns**
-   - How does ridership vary by month, day of week, and hour?
-   - How do weekday and weekend usage patterns differ?
-   - How does usage differ between regular and e-assist bikes?
+[Power BI Project](powerbi/taipei_youbike_dashboard.pbip)
 
-2. **Station Performance**
-   - Which stations have the highest rental and return activity?
-   - Which stations show the strongest directional imbalance?
-   - How does station activity vary throughout the day?
+### Network Overview
 
-3. **Origin-Destination Flows**
-   - What are the most common station-to-station routes?
-   - How do morning and evening travel flows differ?
-   - How do weekday and weekend mobility patterns differ?
+Summarizes overall ridership, monthly average daily trips, weekday and weekend hourly usage patterns, trip duration distribution, and the monthly share of e-assist bike trips. 
 
-4. **Area-Level Mobility**
-   - Which areas generate the most YouBike activity?
-   - How does activity differ across areas after accounting for station availability?
+![Network Overview](powerbi/images/page-01.jpg)
+
+### Station Performance
+
+Compares station activity, relative directional imbalance, and morning versus evening net flow at the busiest stations. A station selector supports exploring hourly rental and return patterns. 
+
+![Station Performance](powerbi/images/page-02.jpg)
+
+### Mobility Flow
+
+Highlights the most frequent directed station-to-station routes, morning and evening peak routes, inter-area flows, and full-period activity per active station across source-defined areas. 
+
+![Mobility Flow](powerbi/images/page-03.jpg)
+
+The images and PDF provide static views of the report. To explore its interactive features, open the PBIP project in Power BI Desktop with the accompanying `.Report` and `.SemanticModel` directories. 
+
+## 3. Key Findings
 
 ## Dataset
 
