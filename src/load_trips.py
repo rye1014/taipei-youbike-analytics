@@ -19,7 +19,6 @@ SQL_DATABASE = os.environ.get("YOUBIKE_SQL_DATABASE", "TaipeiYouBikeAnalytics")
 SQL_DRIVER = os.environ.get("YOUBIKE_SQL_DRIVER", "ODBC Driver 17 for SQL Server")
 STAGING_TABLE = "dbo.stg_trip_import"
 FACT_TABLE = "dbo.fact_trips"
-LOAD_LOG_TABLE = "dbo.etl_trip_load_log"
 
 SOURCE_FILE_PATTERN = re.compile(r"^\d{6}\.csv$")
 
@@ -96,37 +95,6 @@ def fact_has_source_file(cursor: pyodbc.Cursor, source_file: str) -> bool:
 
 def truncate_staging(cursor: pyodbc.Cursor) -> None:
     cursor.execute(f"TRUNCATE TABLE {STAGING_TABLE};")
-
-
-def insert_load_log(
-    cursor: pyodbc.Cursor,
-    *,
-    source_file: str,
-    source_row_count: int | None,
-    loaded_row_count: int | None,
-    status: str,
-    error_message: str | None = None,
-) -> None:
-    insert_sql = f"""
-INSERT INTO {LOAD_LOG_TABLE} (
-    source_file,
-    source_row_count,
-    loaded_row_count,
-    duration_parse_failures,
-    status,
-    error_message
-)
-VALUES (?, ?, ?, ?, ?, ?);
-"""
-    cursor.execute(
-        insert_sql,
-        source_file,
-        source_row_count,
-        loaded_row_count,
-        None,
-        status,
-        error_message,
-    )
 
 
 def read_trip_chunks(csv_path: Path) -> pd.io.parsers.TextFileReader:
@@ -208,28 +176,11 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
                 f"source={source_row_count:,}, staging={loaded_row_count:,}"
             )
 
-        insert_load_log(
-            cursor,
-            source_file=source_file,
-            source_row_count=source_row_count,
-            loaded_row_count=loaded_row_count,
-            status="success",
-        )
         connection.commit()
         return source_row_count
 
-    except Exception as exc:
+    except Exception:
         connection.rollback()
-        failure_cursor = connection.cursor()
-        insert_load_log(
-            failure_cursor,
-            source_file=source_file,
-            source_row_count=source_row_count,
-            loaded_row_count=loaded_row_count,
-            status="failed",
-            error_message=str(exc)[:1000],
-        )
-        connection.commit()
         raise
 
 
