@@ -159,7 +159,7 @@ This preserves row-level lineage without implying the existence of a source tran
 
 ### Full-load validation
 
-After all 12 monthly files were loaded and transformed, the final analytical table was validated using `sql/03_validate_full_load.sql`.
+After all 12 monthly files were loaded and transformed, the final analytical table was validated using `sql/04_validate_full_load.sql`.
 
 | Validation check | Result |
 | --- | --- | 
@@ -186,7 +186,7 @@ A small proportion of station names were flagged as degraded because of source-l
 
 The unmatched records are expected in part because the station reference is a point-in-time snapshot dated 2026-09-11 rather than a historical station dimension. 
 
-Detailed validation queries are available in `sql/03_validate_full_load.sql`. 
+Detailed validation queries are available in `sql/04_validate_full_load.sql`. 
 
 ### Performance optimization 
 
@@ -204,7 +204,7 @@ A representative monthly ridership aggregation was executed before and after the
 
 For this benchmark, elapsed query time decreased by approximately 63%, while the table's reserved storage decreased by approximately 69%.
 
-The columnstore optimization is implemented in `sql/04_optimize_fact_table.sql`, and the benchmark query is available in `sql/benchmark/benchmark.sql`.
+The columnstore optimization is implemented in `sql/05_optimize_fact_table.sql`, and the benchmark query is available in `sql/benchmark/benchmark.sql`.
 
 ## Repository Structure
 
@@ -218,13 +218,19 @@ taipei-youbike-analytics/
 │   └── README.md
 │
 ├── sql/
-│   ├── 00_create_station_reference.sql
-│   ├── 01_create_trip_tables.sql
-│   ├── 02_transform_trips.sql
-│   ├── 03_validate_full_load.sql
-│   ├── 04_optimize_fact_table.sql
-│   └── benchmark/
-│       └── benchmark.sql
+│   ├── 01_create_station_reference.sql
+│   ├── 02_create_trip_tables.sql
+│   ├── 03_transform_trips.sql
+│   ├── 04_validate_full_load.sql
+│   ├── 05_optimize_fact_table.sql
+│   ├── benchmark/
+│   │   └── benchmark.sql
+│   └── analysis
+│       ├── 01_usage_patterns.sql
+│       ├── 02_station_performance.sql
+│       ├── 03_od_flows.sql
+│       ├── 04_area_analysis.sql
+│       └── 05_powerbi_views.sql
 │
 ├── src/
 │   ├── load_station_reference.py
