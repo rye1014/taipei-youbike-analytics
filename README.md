@@ -43,6 +43,47 @@ The images and PDF provide static views of the report. To explore its interactiv
 
 ## 3. Key Findings
 
+### 1. Weekday and weekend usage follow different hourly patterns
+
+Weekday usage shows clear morning and evening peaks, around 08:00 and 17:00-18:00. Weekend usage builds more gradually during the day, without a strong morning peak. 
+
+### 2. Most trips last less than 20 minutes
+
+Approximately **59.1%** of trips with parseable durations lasted less than 10 minutes, and **83.7%** lasted less than 20 minutes.
+
+The distribution shows that YouBike usage is predominantly short in duration, although trip duration alone does not establish travel distance or purpose.
+
+### 3. Station activity and relative imbalance reveal different patterns
+
+**捷運公館站(2號出口)** recorded the highest station activity, with **545,625 rentals** and **592,498 returns**, totaling **1,138,123 activity events**. 
+
+However, among stations with at least 100,000 activity events, **臺大人文館** had the highest relative imbalance at **27.01%**, with 29,009 more rentals than returns. 
+
+These results illustrate that high activity volume and directional imbalance capture different station characteristics. Neither measure shows whether a station ran out of bikes or had no spaces available for returns. 
+
+### 4. Half of the top morning routes appear in reverse in the evening top 20
+
+Among the top 20 directed OD routes during the morning peak (07:00-09:59), **10 routes (50%)** had their reverse routes in the evening top 20 (17:00-19:59). 
+
+This shows that some popular morning routes are also popular in the opposite direction during the evening. The analysis covers both weekdays and weekends and excludes same-station trips. 
+
+The 50% overlap refers specifically to the ranked routes, not all trips or individual riders making return journeys. 
+
+### 5. Area rankings change when activity is compared per active station
+
+**大安區** ranked first in both total activity and average full-period activity per active station, with approximately **147,370 rental/return events per active station**.
+
+In contrast, **中山區** ranked second in total activity but seventh in average activity per active station, with approximately **90,369 events**. 
+
+These comparisons show that total activity and average station-level activity provide different perspectives on area usage. Average activity per active station does not account for station capacity or actual operating days and should not be interpreted as a utilization rate. 
+
+Supporting queries: 
+
+- [Usage patterns](sql/analysis/01_usage_patterns.sql)
+- [Station performance](sql/analysis/02_station_performance.sql)
+- [OD flows](sql/analysis/03_od_flows.sql)
+- [Area analysis](sql/analysis/04_area_analysis.sql)
+
 ## Dataset
 
 The raw data files are not included in this GitHub repository. Instructions for obtaining and placing the source files are documented in `data/README.md`.
