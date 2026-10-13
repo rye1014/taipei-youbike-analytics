@@ -120,6 +120,58 @@ Historical trip station names may not match this later snapshot. Unmatched recor
 
 Raw data files are not included in this repository because of their size. Source links and local file placement instructions are available in [data/README.md](data/README.md). 
 
+## 5. Methodology
+
+### Time-Based Analysis
+
+Usage patterns are grouped by rental month, day of the week, and hour. Weekdays are Monday through Friday, and weekends are Saturday and Sunday; public holidays are not classified separately. 
+
+Morning peak is defined as 07:00 ≤ time < 10:00, and evening peak as 17:00 ≤ time < 20:00. Peak-period analyses include both weekdays and weekends. Rental events use `rent_time`, return events use `return_time`, and OD trips are assigned to peak periods using `rent_time`. 
+
+The analysis period covers 365 calendar days, with all 8,760 expected date-hour combinations present in the data. Overall average daily trips are calculated as total trips divided by 365, while monthly and day-of-week averages use the number of dates in each group. Network-level hourly averages are calculated by averaging each hour's daily trip counts across dates in the relevant month or weekday/weekend group. 
+
+### Trip Duration and Bike Type
+
+Trip duration comes from the source `rent` field, which represents duration rather than a fare. Values are converted from HH:MM:SS to seconds for analysis. 
+
+Rental and return timestamps are recorded at hourly resolution, so their difference is not used to calculate exact trip duration. The duration distribution excludes the two records whose duration values could not be parsed; zero-duration records remain included. 
+
+Bike-type comparisons cover March 2025 to February 2026, with no missing bike-type values in the selected analysis period. Hourly shares are calculated within each bike type so that differences in total usage do not dominate the comparison. 
+
+### Station Activity and Imbalance
+
+Station activity counts rentals and returns independently by matched endpoint. A trip contributes a rental when its origin matches the station reference, even if its destination does not match, and vice versa for returns. 
+
+| Metric | Definition | 
+| :-- | :-- | 
+| Total activity | Rentals + returns | 
+| Net flow | Returns - rentals | 
+| Absolute imbalance | Absolute value of net flow | 
+| Relative imbalance (%) | Absolute imbalance ÷ total activity × 100 |
+
+Total activity counts rental and return events, not trips. A trip with both endpoints included contributes two events. 
+
+Relative imbalance rankings include only stations with at least 100,000 activity events. This is an analytical threshold, not an official operating standard. In the station analysis SQL, hourly and peak_period comparisons focus on the 10 stations with the highest full-period activity. 
+
+Net flow describes the difference between recorded returns and rentals. It does not measure inventory change because bike redistribution is not observed. 
+
+### Origin-Destination Analysis
+
+OD analysis includes only trips whose origin and destination both match the station reference. Directed routes treat A → B and B → A as separate routes, while station-pair analysis combines both directions and compares their trip counts. 
+
+The initial OD ranking includes same-station trips, which are also examined separately. Inter-station route and station-pair analyses exclude them. 
+
+Morning and evening comparisons examine the top routes in each period and whether their reverse routes appear in the other period. Weekday and weekend comparisons examine route rankings, average daily trips, and overlap between the two top-20 lists. Route-level daily averages use all observed dates of the relevant day type, including dates when that route has no trips. 
+
+### Area-Level Analysis
+
+Area analysis includes only trips with both endpoints matched, so rentals and returns use the same trip population. Its totals should not be compared directly with station-level totals, which count matched endpoints independently. 
+
+Areas follow the source classification: Taipei's 12 administrative districts and the separately classified 臺大公館校區. Flows between these categories therefore do not always represent travel between administrative districts. 
+
+An active station is a station observed as an origin or destination in at least one eligible trip during the analysis period. 
+
+Average activity per active station is calculated as total area activity divided by active station count. It covers the full 12-month period, rather than a single day, and does not account for station capacity or actual operating days. 
 
 
 
