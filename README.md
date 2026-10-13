@@ -84,40 +84,49 @@ Supporting queries:
 - [OD flows](sql/analysis/03_od_flows.sql)
 - [Area analysis](sql/analysis/04_area_analysis.sql)
 
-## Dataset
+## 4. Data Sources & Scope
 
-The raw data files are not included in this GitHub repository. Instructions for obtaining and placing the source files are documented in `data/README.md`.
+The project uses two public datasets: 
 
-Data sources:
+- **Trip records:** [臺北市公共自行車2.0租借紀錄](https://data.gov.tw/dataset/150635)
+- **Station reference:** [YouBike2.0臺北市公共自行車即時資訊](https://data.nat.gov.tw/dataset/147580)
 
-- Trip records: [臺北市公共自行車2.0租借紀錄](https://data.gov.tw/dataset/150635)
-- Station reference: [YouBike2.0臺北市公共自行車即時資訊](https://data.nat.gov.tw/dataset/147580)
+### Analysis Scope
 
-Confirmed local audit scope:
+| Item | Scope |
+| :-- | :-- | 
+| Analysis period | March 2025 to February 2026 | 
+| Trip records | 77,389,891 records across 12 monthly CSV files | 
+| Data granularity | Individual trip records | 
+| Station reference | 1,800 station records in `youbike_immediate.json` | 
+| Station snapshot date | September 11, 2026 | 
+| Area classification | Taipei's 12 administrative districts and the separately classified 臺大公館校區 |
 
-- Raw data period: **2020-04 to 2026-02**
-- Primary analytical period: **2025-03 to 2026-02**
-- Primary analytical period size: **77,389,891** trip records
-- Trip data source format: monthly CSV files
-- Station reference file: `data/youbike_immediate.json`
-- Station reference snapshot date: **2026-09-11**
-- Station reference size: **1,800** station records
+The trip records include rental and return times, origin and destination station names, trip duration, and bike type. The station reference provides station IDs, names, areas, coordinates, and snapshot capacity. 
 
-The station reference is a point-in-time snapshot. It is not a historical station dimension and should not be used to infer past station availability, historical station openings/closures, or historical capacity changes.
+### Period Selection
 
-## Dataset and Analytical Scope
+The analysis covers a continuous 12-month period to compare usage across months, days of the week, and hours of the day. The selected monthly files use a consistent seven-column schema, including bike type throughout the analysis period. 
 
-The full historical dataset from 2020-04 to 2026-02 was evaluated using an automated data audit. Based on that audit, the primary analysis will focus on the recent 12-month period from 2025-03 to 2026-02.
+An earlier audit examined historical files from April 2020 to February 2026 to identify schema changes and data-quality issues. That broader period provides background for data preparation; the final analysis uses only March 2025 to February 2026. 
 
-This 12-month period was selected because it provides:
+### Station Reference Snapshot
 
-- a complete annual cycle
-- consistent bike-type availability
-- recent operating data
-- more stable schema and encoding
-- manageable computational scope for a portfolio project
+The station reference is a single snapshot taken after the analysis period. It does not provide historical station availability, opening and closing dates, or changes in capacity. 
 
-The broader historical dataset remains useful for understanding schema changes, data quality patterns, and long-term context, but it is not the primary period for final portfolio analysis.
+Historical trip station names may not match this later snapshot. Unmatched records are retained, while station, OD, and area analyses apply the matching rules described in Methodology. Snapshot counts of available bikes and return spaces are not used to describe historical conditions. 
+
+### Data Access
+
+Raw data files are not included in this repository because of their size. Source links and local file placement instructions are available in [data/README.md](data/README.md). 
+
+
+
+
+
+
+
+
 
 ## Data Pipeline
 
