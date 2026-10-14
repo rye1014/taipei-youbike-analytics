@@ -17,9 +17,7 @@ The analysis focuses on four areas:
 
 The Power BI report presents the analysis across three pages. 
 
-[View the dashboard PDF](powerbi/taipei_youbike_dashboard.pdf)
-
-[Power BI Project](powerbi/taipei_youbike_dashboard.pbip)
+[View the dashboard PDF](powerbi/taipei_youbike_dashboard.pdf) | [Power BI Project](powerbi/taipei_youbike_dashboard.pbip)
 
 ### Network Overview
 
@@ -173,148 +171,86 @@ An active station is a station observed as an origin or destination in at least 
 
 Average activity per active station is calculated as total area activity divided by active station count. It covers the full 12-month period, rather than a single day, and does not account for station capacity or actual operating days. 
 
+## 6. Data Pipeline & Implementation
 
+Python ingests monthly trip CSV files into a SQL Server staging table and loads station reference data from a JSON snapshot. A T-SQL stored procedure then transforms the staged trip records, matches station names, and adds data-quality flags before inserting the results into the fact table. Analytical queries and reporting views use these tables to support the analysis and Power BI report. 
 
+```mermaid
+flowchart TD
+   A[Monthly trip CSVs] --> B[Python trip loader]
+   B --> C[dbo.stg_trip_import]
+   D[Station JSON snapshot] --> E[Python station loader]
+   E --> F[dbo.station_reference]
+   C --> G[T-SQL transformation procedure]
+   F --> G
+   G --> H[dbo.fact_trips]
+   H --> I[Analytical SQL]
+   F --> I
+   H --> J[Power BI reporting views]
+   F --> J
+   J --> K[Power BI report]
+```
 
+### Data Ingestion
 
+The trip loader (`src/load_trips.py`) reads monthly CSV files in chunks of 200,000 rows using pandas and inserts them into `dbo.stg_trip_import` through pyodbc. It expects the headerless seven-column format used by the selected files and reads source values as text, leaving timestamp and duration conversion to SQL. Each row is stored with its source filename and row number within the file so it can be traced back to the original CSV. 
 
+The station loader (`src/load_station_reference.py`) reads the JSON snapshot, checks that the required fields are present, and converts coordinates, capacity, and the snapshot date to the appropriate data types before inserting the records into `dbo.station_reference`. It preserves the original station name and creates a separate name without the `YouBike2.0_` prefix for matching against trip records. 
 
+### SQL Transformation & Data Model
 
-## Data Pipeline
+The trip loader calls `dbo.usp_transform_trip_file`, defined in `sql/03_transform_trips.sql`, to process one source file at a time. The procedure converts rental and return timestamps and the source date to date/time types, converts trip duration to seconds, and matches origin and destination names to `dbo.station_reference` using exact name matching. It then inserts the results into `dbo.fact_trips`, preserving raw station names, raw duration values, and source-row references. 
 
-The ingestion pipeline follows the structure:
+Records with unparseable durations or unmatched station names are retained in the fact table. Failed duration conversions produce a NULL value in `trip_duration_seconds` and set `duration_parse_failed` to 1, while unmatched station names leave the corresponding station ID as NULL. Names containing a literal question mark (`?`) or the Unicode replacement character (`U+FFFD`) are preserved and flagged using `origin_name_degraded` or `destination_name_degraded`. 
 
-CSV
+The database uses three core tables: 
 
--> Python chunked ingestion
+| Table | Purpose | 
+| :-- | :-- |
+| `dbo.station_reference` | Stores station IDs, original and matching names, areas, coordinates, capacity, and the snapshot date. |
+| `dbo.stg_trip_import` | Holds raw trip values as text, together with the source filename and row number, before SQL transformation. |
+| `dbo.fact_trips` | Stores transformed trip records, matched station IDs, raw station names and duration values, source-row references, and data-quality flags. |
 
--> SQL Server staging table
+The fact table links to the station reference through `origin_station_id` and `destination_station_id`, allowing station details to be used separately for the rental and return endpoints. 
 
--> SQL transformation
+### Validation & Rerun Checks
 
--> analytical fact table
+Before loading a trip file, the Python loader checks whether its filename already appears in `dbo.fact_trips` and skips it if found. For a file that has not been loaded, the loader requires the staging table to be empty and stops if any rows remain. It does not automatically clear existing staging data to start a new load. 
 
-## Data Model
+For each trip file, the loader checks that the number of rows read from the CSV matches the number inserted into staging. The SQL transformation runs within a transaction and checks that the number of inserted fact rows matches the staging count, rolling back the transformation if the counts differ. After the procedure completes, Python checks the staging and fact counts again before clearing staging for the next file. 
 
-### `dbo.station_reference`
+### Performance Optimization
 
-Reference table containing the current YouBike station snapshot.
-
-### `dbo.stg_trip_import`
-
-Temporary staging table for raw monthly trip records.
-
-### `dbo.fact_trips`
-
-Primary analytical fact table containing cleaned and transformed trip records.
-
-Key fields include:
-
-- source lineage
-- rental and return timestamps
-- origin and destination station names
-- matched station IDs
-- trip duration
-- bike type
-- data-quality flags
-
-## Data Quality & Methodology
-
-The analytical dataset was designed to preserve source information while making data-quality issues explicit rather than silently correcting or removing records. 
-
-### Trip duration
-
-The raw `rent` field represents trip duration in `HH:MM:SS` format and is treated as the primary duration measure. 
-
-Rental and return timestamps appear to be rounded, while the duration field retains finer time precision. For this reason, trip duration is not recalculated from `rent_time` and `return_time`.
-
-The original duration value is preserved in `trip_duration_raw` and separately converted to `trip_duration_seconds` for analysis. Records that cannot be parsed are retained and flagged using `duration_parse_failed`.
-
-### Station matching
-
-Origin and destination station names are matched to `station_reference.station_name` using exact matching only. 
-
-No fuzzy matching or manual station-name remapping is applied. If a historical station name cannot be matched to the current station reference, the trip is retained and the corresponding station ID remains `NULL`. 
-
-This approach prioritizes reproducibility and avoids introducing uncertain mappings into the analytical dataset.
-
-### Degraded station names
-
-Some source station names contain evidence of character degradation, including:
-
-- ASCII question mark `?`
-- Unicode replacement character `U+FFFD`
-
-These values are preserved as they appear in the source and flagged using `origin_name_degraded` or `destination_name_degraded`.
-
-No attempt is made to reconstruct missing characters because the original text cannot be recovered reliably from the affected records.
-
-### Duplicates
-
-Exact duplicate trip rows are not automatically removed.
-
-The source data does not provide a unique transaction identifier, so two identical rows cannot be reliably distinguished as either duplicate records or separate trips with identical attributes.
-
-Removing them would therefore require an unsupported assumption about the source data.
-
-### Source lineage
-
-No artificial trip transaction ID is created.
-
-Each record remains traceable to its source CSV using the combination:
-
-`source_file + row_number_in_file`
-
-This preserves row-level lineage without implying the existence of a source transaction identifier.
-
-### Full-load validation
-
-After all 12 monthly files were loaded and transformed, the final analytical table was validated using `sql/04_validate_full_load.sql`.
-
-| Validation check | Result |
-| --- | --- | 
-| Analysis period | 2025-03 to 2026-02 | 
-| Monthly source files | 12 | 
-| Total trip records | 77,389,891 |
-| `rent_time` parsing failures | 0 |
-| `return_time` parsing failures | 0 |
-| `info_date` parsing failures | 0 |
-| Duration parsing failures | 2 | 
-| Origin station match rate | 99.34% |
-| Destination station match rate | 97.81% |
-| Both stations matched | 97.21% |
-| Degraded origin station names | 158,570 |
-| Degraded destination station names | 158,302 |
-
-The validation confirmed that all 12 monthly source files were successfully loaded into `dbo.fact_trips`, producing 77,389,891 trip records for the primary analytical period. 
-
-All rental timestamps, return timestamps, and source dates were parsed successfully. Only two duration values could not be parsed and were retained with `duration_parse_failed = 1`. 
-
-Exact station-name matching linked 99.34% of origin records and 97.81% of destination records to the station reference, while both endpoints were matched for 97.21% of trips. 
-
-A small proportion of station names were flagged as degraded because of source-level character loss. These records, along with unmatched station IDs, were retained rather than manually corrected or excluded. 
-
-The unmatched records are expected in part because the station reference is a point-in-time snapshot dated 2026-09-11 rather than a historical station dimension. 
-
-Detailed validation queries are available in `sql/04_validate_full_load.sql`. 
-
-### Performance optimization 
-
-The final `dbo.fact_trips` table contains more than 77 million records and is primarily used for analytical workloads involving large table scans, aggregations, and grouping operations.
-
-To improve query performance for these workloads, a clustered columnstore index was created on the fact table after the full data load and validation were completed.
-
-A representative monthly ridership aggregation was executed before and after the optimization using the same benchmark query:
+A clustered columnstore index (`CCI_fact_trips`) was added to `dbo.fact_trips` after loading and validation to support analytical queries over more than 77 million records. A monthly trip-count query was used to compare performance before and after the change. 
 
 | Metric | Before | After | 
-| --- | ---: | ---: | 
+| :-- | --: | --: | 
 | Query elapsed time | 9.99 s | 3.73 s | 
 | CPU time | 39.47 s | 26.39 s | 
 | Table reserved storage | 11.54 GB | 3.57 GB | 
 
-For this benchmark, elapsed query time decreased by approximately 63%, while the table's reserved storage decreased by approximately 69%.
+These measurements describe the recorded benchmark, rather than a guaranteed improvement for every query. 
 
-The columnstore optimization is implemented in `sql/05_optimize_fact_table.sql`, and the benchmark query is available in `sql/benchmark/benchmark.sql`.
+The index is defined in [sql/05_optimize_fact_table.sql](sql/05_optimize_fact_table.sql), and the benchmark query is available in [sql/benchmark/benchmark.sql](sql/benchmark/benchmark.sql). 
+
+### Analysis & Reporting 
+
+The analytical SQL files in `sql/analysis/` cover usage patterns, station performance, origin-destination flows, and area-level mobility. The reporting script `05_powerbi_views.sql` defines 16 views that prepare aggregated data for Power BI. 
+
+The Power BI report is maintained as a PBIP project, with report and semantic model definitions stored in the accompanying `.Report` and `.SemanticModel` directories. These files allow changes to the report structure and model to be tracked in Git. 
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 ## Repository Structure
 
