@@ -9,7 +9,19 @@ ORDER BY source_file;
 SELECT COUNT(*) AS total_trips
 FROM dbo.fact_trips;
 
--- date null check 
+-- rental date coverage
+SELECT 
+    COUNT(DISTINCT CAST(rent_time AS date)) AS active_days
+FROM dbo.fact_trips; 
+
+-- rental date-hour coverage
+SELECT
+    365 * 24 AS expected_date_hour_groups,
+    COUNT(DISTINCT DATETRUNC(hour, rent_time))
+        AS observed_date_hour_groups
+FROM dbo.fact_trips; 
+
+-- date null check
 SELECT
     SUM(CASE WHEN rent_time IS NULL THEN 1 ELSE 0 END) AS rent_time_nulls,
     SUM(CASE WHEN return_time IS NULL THEN 1 ELSE 0 END) AS return_time_nulls,

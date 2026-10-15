@@ -239,9 +239,64 @@ The analytical SQL files in `sql/analysis/` cover usage patterns, station perfor
 
 The Power BI report is maintained as a PBIP project, with report and semantic model definitions stored in the accompanying `.Report` and `.SemanticModel` directories. These files allow changes to the report structure and model to be tracked in Git. 
 
+## 7. Data Quality & Limitations
 
+### Validation Summary
 
+The validated load contains 77,389,891 trip records from 12 monthly CSV files covering March 2025 to February 2026. Validation checked record counts, timestamp and duration parsing, time coverage, bike-type completeness, and station matching. 
 
+| Check | Result | 
+| :-- | --: | 
+| Monthly source files | 12 | 
+| Total trip records | 77,389,891 | 
+| Observed rental dates | 365 | 
+| Observed rental date-hour combinations | 8,760 / 8,760 expected | 
+| Rental timestamp parsing failures | 0 | 
+| Return timestamp parsing failures | 0 | 
+| Source date parsing failures | 0 | 
+| Duration parsing failures | 2 | 
+| Missing bike-type values | 0 | 
+| Origin station match rate | 99.34% | 
+| Destination station match rate | 97.81% | 
+| Both endpoints matched | 97.21% | 
+| Records with degraded origin station names | 158,570 (0.205%) | 
+| Records with degraded destination station names | 158,302 (0.205%) | 
+
+All expected rental dates and date-hour combinations are present. This confirms coverage at the daily and hourly levels, but does not prove that every trip was captured by the source. 
+
+Rental timestamps, return timestamps, and source dates were parsed successfully. The two records with unparseable durations were retained and flagged, then excluded from the trip duration distribution. 
+
+Station match rates measure whether recorded names could be linked to the station reference through exact name matching. Unmatched records were retained, and each analysis applies the endpoint matching rules described in Methodology. Unmatched names may result from degraded source text, station renaming, differences in name format, or historical stations no longer listed in the later snapshot. These possible causes have not been confirmed for individual records. 
+
+Degraded station names contain a literal question mark (`?`) or the Unicode replacement character (`U+FFFD`). These names were preserved and flagged rather than repaired. The percentages use all 77,389,891 trip records as the denominator. The origin and destination counts can overlap within the same trip and should not be added together to count affected trips. 
+
+The full-load validation script is available in [sql/04_validate_full_load.sql](sql/04_validate_full_load.sql). 
+
+### Data Handling Decisions
+
+Source CSV and JSON files are kept unchanged. Original trip station names and duration values are preserved in the analytical dataset, and each trip record remains traceable through its source filename and row number. 
+
+Exact duplicate rows are not automatically removed because the source does not provide a unique trip transaction ID, and rental and return timestamps are recorded only to the hour. Different trips within the same hour may therefore have identical recorded attributes. Identical rows alone are not sufficient evidence of duplicate transactions, so removing them would require additional evidence. 
+
+Zero-duration records are retained and included in the duration distribution, as a zero duration alone is not sufficient evidence for deletion. The two records with unparseable durations are also retained but excluded from duration-based calculations.
+
+Unmatched and degraded station names are preserved without fuzzy matching or manual name corrections. The `YouBike2.0_` prefix is removed only from a separate station-reference name used for matching; the original reference name is retained. 
+
+Exclusions are applied to individual analyses rather than by deleting records from the fact table. Station analysis counts matched rental and return endpoints independently, while OD and area analyses require both endpoints to match. Same-station trips remain in the dataset and are examined separately, but are excluded from inter-station route and station-pair analyses. 
+
+### Analytical Limitations
+
+**Timestamp precision.** Rental and return timestamps are recorded only to the hour, so the analysis can describe hourly patterns but not the exact timing of events within each hour. Trip duration comes from the separate `rent` field rather than the difference between these timestamps. 
+
+**Station reference coverage.** Station details come from a single snapshot dated September 11, 2026, after the analysis period. The snapshot does not show historical station openings, closures, renaming, or capacity changes. Station analyses use matched endpoints independently, while OD and area analyses require both endpoints to match. Consequently, these analyses do not fully represent trips involving unmatched station names.
+
+**Activity comparisons.** Total activity counts rental and return events, not individual trips. Average activity per active station accounts for the number of observed active stations, but not their capacity or actual operating days. It should not be interpreted as a measure of station utilization or efficiency. 
+
+**Bike availability and redistribution.** The data does not include historical bike availability, available return spaces, or operator redistribution records. Net flow therefore describes the difference between recorded returns and rentals, not actual inventory change. It cannot establish whether a station ran out of bikes or had no spaces available for returns. Completed trip records also do not capture unsuccessful attempts to rent or return a bike. 
+
+**Travel paths and trip purpose.** The data records rental and return stations but does not include GPS tracks or rider identifiers. OD routes describe endpoint pairs rather than the paths actually traveled. Trip duration, station names, and peak-period patterns alone cannot establish travel distance, trip purpose, or whether the same rider made a return journey. 
+
+**Time scope and external factors.** The analysis covers one 12-month period, which supports comparisons within the selected period but does not establish recurring seasonal patterns or long-term trends. Public holidays are not classified separately, and weather, service changes, and other external factors are not included. Observed differences therefore do not establish their causes. 
 
 
 
