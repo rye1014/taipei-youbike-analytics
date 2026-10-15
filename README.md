@@ -149,7 +149,7 @@ Station activity counts rentals and returns independently by matched endpoint. A
 
 Total activity counts rental and return events, not trips. A trip with both endpoints included contributes two events. 
 
-Relative imbalance rankings include only stations with at least 100,000 activity events. This is an analytical threshold, not an official operating standard. In the station analysis SQL, hourly and peak_period comparisons focus on the 10 stations with the highest full-period activity. 
+Relative imbalance rankings include only stations with at least 100,000 activity events. This is an analytical threshold, not an official operating standard. In the station analysis SQL, hourly and peak-period comparisons focus on the 10 stations with the highest full-period activity. 
 
 Net flow describes the difference between recorded returns and rentals. It does not measure inventory change because bike redistribution is not observed. 
 
@@ -298,16 +298,9 @@ Exclusions are applied to individual analyses rather than by deleting records fr
 
 **Time scope and external factors.** The analysis covers one 12-month period, which supports comparisons within the selected period but does not establish recurring seasonal patterns or long-term trends. Public holidays are not classified separately, and weather, service changes, and other external factors are not included. Observed differences therefore do not establish their causes. 
 
+## 8. Repository Structure
 
-
-
-
-
-
-
-
-
-## Repository Structure
+Raw CSV and JSON files shown below are stored locally and are not tracked in Git. 
 
 ``` text
 taipei-youbike-analytics/
@@ -326,7 +319,7 @@ taipei-youbike-analytics/
 │   ├── 05_optimize_fact_table.sql
 │   ├── benchmark/
 │   │   └── benchmark.sql
-│   └── analysis
+│   └── analysis/
 │       ├── 01_usage_patterns.sql
 │       ├── 02_station_performance.sql
 │       ├── 03_od_flows.sql
@@ -337,27 +330,16 @@ taipei-youbike-analytics/
 │   ├── load_station_reference.py
 │   └── load_trips.py
 │
+├── powerbi/
+│   ├── taipei_youbike_dashboard.pbip
+│   ├── taipei_youbike_dashboard.Report/
+│   ├── taipei_youbike_dashboard.SemanticModel/
+│   ├── taipei_youbike_dashboard.pdf
+│   └── images/
+│       ├── page-01.jpg
+│       ├── page-02.jpg
+│       └── page-03.jpg
+│
 ├── README.md
 └── .gitignore
 ```
-
-## Current Status
-
-Completed:
-
-- [x] Dataset audit
-- [x] Analytical period selection
-- [x] SQL Server data model
-- [x] Station reference ingestion
-- [x] Chunked trip CSV ingestion
-- [x] SQL transformation pipeline
-- [x] Full 12-month database load
-- [x] Full-load data validation
-- [x] Analytical fact-table optimization
-
-In progress:
-
-- [ ] Exploratory SQL analysis
-- [ ] Python analysis
-- [ ] Power BI dashboard
-- [ ] Final findings and recommendations
