@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 import json
 from datetime import date
 from pathlib import Path
@@ -9,9 +10,9 @@ import pyodbc  # type: ignore[import-not-found]
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 JSON_PATH = PROJECT_ROOT / "data" / "youbike_immediate.json"
-SQL_SERVER = "localhost"
-SQL_DATABASE = "TaipeiYouBikeAnalytics"
-SQL_DRIVER = "ODBC Driver 17 for SQL Server"
+SQL_SERVER_ENV_VAR = "YOUBIKE_SQL_SERVER"
+SQL_DATABASE = os.environ.get("YOUBIKE_SQL_DATABASE", "TaipeiYouBikeAnalytics")
+SQL_DRIVER = os.environ.get("YOUBIKE_SQL_DRIVER", "ODBC Driver 17 for SQL Server")
 SQL_TABLE = "dbo.station_reference"
 STATION_NAME_PREFIX = "YouBike2.0_"
 
@@ -103,9 +104,15 @@ def transform_rows(rows: list[dict[str, Any]]) -> list[tuple[Any, ...]]:
 
 def build_connection_string() -> str:
     """Build a SQL Server connection string using Windows Authentication."""
+    sql_server = os.environ.get(SQL_SERVER_ENV_VAR)
+    if not sql_server:
+        raise RuntimeError(
+            f"Set {SQL_SERVER_ENV_VAR} before loading data into SQL Server."
+        )
+
     return (
         f"DRIVER={{{SQL_DRIVER}}};"
-        f"SERVER={SQL_SERVER};"
+        f"SERVER={sql_server};"
         f"DATABASE={SQL_DATABASE};"
         "Trusted_Connection=yes;"
         "TrustServerCertificate=yes;"
