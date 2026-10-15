@@ -4,6 +4,8 @@
 
 This project analyzes Taipei YouBike 2.0 trip records to understand usage patterns, station activity, directional imbalance, and origin-destination flows. It covers approximately 77.4 million trip records from March 2025 to February 2026, a continuous 12-month analysis period. 
 
+**Tools:** SQL Server 2022 · T-SQL · Python (pandas, pyodbc) · Power BI
+
 Python loads the source data into Microsoft SQL Server, where T-SQL handles trip data transformation, validation, and analysis. Power BI presents the results through a three-page interactive dashboard. 
 
 The analysis focuses on four areas: 
@@ -37,7 +39,7 @@ Highlights the most frequent directed station-to-station routes, morning and eve
 
 ![Mobility Flow](powerbi/images/page-03.jpg)
 
-The images and PDF provide static views of the report. To explore its interactive features, open the PBIP project in Power BI Desktop with the accompanying `.Report` and `.SemanticModel` directories. 
+The images and PDF provide static views of the report. To explore its interactive features, open the PBIP project in Power BI Desktop with the accompanying `.Report` and `.SemanticModel` directories. This requires a populated SQL Server database, configuration of the `ServerName` and `DatabaseName` parameters, and a data refresh. 
 
 ## Key Findings
 
@@ -81,6 +83,26 @@ Supporting queries:
 - [Station performance](sql/analysis/02_station_performance.sql)
 - [OD flows](sql/analysis/03_od_flows.sql)
 - [Area analysis](sql/analysis/04_area_analysis.sql)
+
+## Recommendations
+
+The findings suggest four priorities for operational review. These are candidates for further evaluation rather than confirmed interventions, because trip records do not show historical bike availability, unmet demand, or operator redistribution. 
+
+### 1. Review weekday and weekend demand separately
+
+Weekday usage peaks around 08:00 and 17:00-18:00, while weekend demand builds more gradually without a strong morning peak. Use separate weekday and weekend profiles when planning station monitoring, with weekday reviews focused on morning and evening peaks and weekend reviews focused on afternoon and evening demand. 
+
+### 2. Prioritize stations using both activity and directional imbalance 
+
+捷運公館站(2號出口) recorded the highest total activity, while 臺大人文館 had the highest relative imbalance among stations with at least 100,000 activity events. Maintain separate review lists for high-activity and high-imbalance stations. Check actual bike and return-space availability before deciding whether additional capacity or redistribution is needed. 
+
+### 3. Evaluate major station connections by peak period
+
+Ten of the morning top 20 directed routes appeared in reverse in the evening top 20. Review morning and evening flows separately to identify directional trip patterns around major station connections. Full-period totals can obscure these directional differences, but trip flows alone cannot determine how many bikes should be redistributed. 
+
+### 4. Compare areas using both total and per-station activity  
+
+大安區 ranked first in both total activity and full-period activity per active station, making it a candidate for further station-level demand and capacity assessment. 中山區 ranked second in total activity but seventh per active station, illustrating why raw totals alone should not determine resource allocation. Consider station capacity and actual operating days before recommending changes to station capacity or bike allocation. 
 
 ## Data Sources & Scope
 
@@ -305,11 +327,8 @@ Raw CSV and JSON files shown below are stored locally and are not tracked in Git
 ``` text
 taipei-youbike-analytics/
 ├── data/
-│   ├── 202503.csv
-│   ├── ...
-│   ├── 202602.csv
-│   ├── youbike_immediate.json
-│   └── README.md
+│   ├── README.md
+│   └── [local CSV and JSON files, not tracked]
 │
 ├── sql/
 │   ├── 01_create_station_reference.sql
