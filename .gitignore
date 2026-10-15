@@ -3,6 +3,8 @@ data/*
 
 sql/temp.sql
 
+notes/
+
 *.txt
 .venv/
 __pycache__/
