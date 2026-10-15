@@ -1,6 +1,6 @@
 # Taipei YouBike Usage & Station Performance Analytics
 
-## 1. Project Overview
+## Project Overview
 
 This project analyzes Taipei YouBike 2.0 trip records to understand usage patterns, station activity, directional imbalance, and origin-destination flows. It covers approximately 77.4 million trip records from March 2025 to February 2026, a continuous 12-month analysis period. 
 
@@ -13,7 +13,7 @@ The analysis focuses on four areas:
 - **Origin-Destination Flows:** Which routes and station pairs carry the most trips, and how common are same-station returns? How do the top routes differ between morning and evening peaks and between weekdays and weekends?
 - **Area-Level Mobility:** How do areas compare in total activity and activity per active station? Which area pairs have the largest trip flows, and how balanced are the two directions?
 
-## 2. Dashboard
+## Dashboard
 
 The Power BI report presents the analysis across three pages. 
 
@@ -39,7 +39,7 @@ Highlights the most frequent directed station-to-station routes, morning and eve
 
 The images and PDF provide static views of the report. To explore its interactive features, open the PBIP project in Power BI Desktop with the accompanying `.Report` and `.SemanticModel` directories. 
 
-## 3. Key Findings
+## Key Findings
 
 ### 1. Weekday and weekend usage follow different hourly patterns
 
@@ -82,12 +82,12 @@ Supporting queries:
 - [OD flows](sql/analysis/03_od_flows.sql)
 - [Area analysis](sql/analysis/04_area_analysis.sql)
 
-## 4. Data Sources & Scope
+## Data Sources & Scope
 
 The project uses two public datasets: 
 
 - **Trip records:** [臺北市公共自行車2.0租借紀錄](https://data.gov.tw/dataset/150635)
-- **Station reference:** [YouBike2.0臺北市公共自行車即時資訊](https://data.nat.gov.tw/dataset/147580)
+- **Station reference:** [YouBike2.0臺北市公共自行車即時資訊](https://tcgbusfs.blob.core.windows.net/dotapp/youbike/v2/youbike_immediate.json)
 
 ### Analysis Scope
 
@@ -100,7 +100,7 @@ The project uses two public datasets:
 | Station snapshot date | September 11, 2026 | 
 | Area classification | Taipei's 12 administrative districts and the separately classified 臺大公館校區 |
 
-The trip records include rental and return times, origin and destination station names, trip duration, and bike type. The station reference provides station IDs, names, areas, coordinates, and snapshot capacity. 
+The trip records include rental and return times, origin and destination station names, trip duration, and bike type. The station reference provides station IDs, names, areas, coordinates, and capacity recorded in the snapshot. 
 
 ### Period Selection
 
@@ -118,7 +118,7 @@ Historical trip station names may not match this later snapshot. Unmatched recor
 
 Raw data files are not included in this repository because of their size. Source links and local file placement instructions are available in [data/README.md](data/README.md). 
 
-## 5. Methodology
+## Methodology
 
 ### Time-Based Analysis
 
@@ -171,7 +171,7 @@ An active station is a station observed as an origin or destination in at least 
 
 Average activity per active station is calculated as total area activity divided by active station count. It covers the full 12-month period, rather than a single day, and does not account for station capacity or actual operating days. 
 
-## 6. Data Pipeline & Implementation
+## Data Pipeline & Implementation
 
 Python ingests monthly trip CSV files into a SQL Server staging table and loads station reference data from a JSON snapshot. A T-SQL stored procedure then transforms the staged trip records, matches station names, and adds data-quality flags before inserting the results into the fact table. Analytical queries and reporting views use these tables to support the analysis and Power BI report. 
 
@@ -221,7 +221,7 @@ For each trip file, the loader checks that the number of rows read from the CSV 
 
 ### Performance Optimization
 
-A clustered columnstore index (`CCI_fact_trips`) was added to `dbo.fact_trips` after loading and validation to support analytical queries over more than 77 million records. A monthly trip-count query was used to compare performance before and after the change. 
+A clustered columnstore index (`CCI_fact_trips`) was added to `dbo.fact_trips` after loading and validation to support analytical queries over more than 77 million records. The same monthly trip-count query was executed once before and once after creating the index. 
 
 | Metric | Before | After | 
 | :-- | --: | --: | 
@@ -235,11 +235,11 @@ The index is defined in [sql/05_optimize_fact_table.sql](sql/05_optimize_fact_ta
 
 ### Analysis & Reporting 
 
-The analytical SQL files in `sql/analysis/` cover usage patterns, station performance, origin-destination flows, and area-level mobility. The reporting script `05_powerbi_views.sql` defines 16 views that prepare aggregated data for Power BI. 
+The analytical SQL files in `sql/analysis/` cover usage patterns, station performance, origin-destination flows, and area-level mobility. The reporting script `05_powerbi_views.sql` defines 16 views that prepare data for Power BI. 
 
 The Power BI report is maintained as a PBIP project, with report and semantic model definitions stored in the accompanying `.Report` and `.SemanticModel` directories. These files allow changes to the report structure and model to be tracked in Git. 
 
-## 7. Data Quality & Limitations
+## Data Quality & Limitations
 
 ### Validation Summary
 
@@ -259,8 +259,8 @@ The validated load contains 77,389,891 trip records from 12 monthly CSV files co
 | Origin station match rate | 99.34% | 
 | Destination station match rate | 97.81% | 
 | Both endpoints matched | 97.21% | 
-| Records with degraded origin station names | 158,570 (0.205%) | 
-| Records with degraded destination station names | 158,302 (0.205%) | 
+| Records with potentially degraded origin station names | 158,570 (0.205%) | 
+| Records with potentially degraded destination station names | 158,302 (0.205%) | 
 
 All expected rental dates and date-hour combinations are present. This confirms coverage at the daily and hourly levels, but does not prove that every trip was captured by the source. 
 
@@ -268,7 +268,7 @@ Rental timestamps, return timestamps, and source dates were parsed successfully.
 
 Station match rates measure whether recorded names could be linked to the station reference through exact name matching. Unmatched records were retained, and each analysis applies the endpoint matching rules described in Methodology. Unmatched names may result from degraded source text, station renaming, differences in name format, or historical stations no longer listed in the later snapshot. These possible causes have not been confirmed for individual records. 
 
-Degraded station names contain a literal question mark (`?`) or the Unicode replacement character (`U+FFFD`). These names were preserved and flagged rather than repaired. The percentages use all 77,389,891 trip records as the denominator. The origin and destination counts can overlap within the same trip and should not be added together to count affected trips. 
+Station names containing a literal question mark (`?`) or the Unicode replacement character (`U+FFFD`) were flagged as potentially degraded. These names were preserved rather than automatically repaired. The percentages use all 77,389,891 trip records as the denominator. The origin and destination counts can overlap within the same trip and should not be added together to count affected trips. 
 
 The full-load validation script is available in [sql/04_validate_full_load.sql](sql/04_validate_full_load.sql). 
 
@@ -280,7 +280,7 @@ Exact duplicate rows are not automatically removed because the source does not p
 
 Zero-duration records are retained and included in the duration distribution, as a zero duration alone is not sufficient evidence for deletion. The two records with unparseable durations are also retained but excluded from duration-based calculations.
 
-Unmatched and degraded station names are preserved without fuzzy matching or manual name corrections. The `YouBike2.0_` prefix is removed only from a separate station-reference name used for matching; the original reference name is retained. 
+Unmatched and potentially degraded station names are preserved without fuzzy matching or manual name corrections. The `YouBike2.0_` prefix is removed only from a separate station-reference name used for matching; the original reference name is retained. 
 
 Exclusions are applied to individual analyses rather than by deleting records from the fact table. Station analysis counts matched rental and return endpoints independently, while OD and area analyses require both endpoints to match. Same-station trips remain in the dataset and are examined separately, but are excluded from inter-station route and station-pair analyses. 
 
@@ -298,7 +298,7 @@ Exclusions are applied to individual analyses rather than by deleting records fr
 
 **Time scope and external factors.** The analysis covers one 12-month period, which supports comparisons within the selected period but does not establish recurring seasonal patterns or long-term trends. Public holidays are not classified separately, and weather, service changes, and other external factors are not included. Observed differences therefore do not establish their causes. 
 
-## 8. Repository Structure
+## Repository Structure
 
 Raw CSV and JSON files shown below are stored locally and are not tracked in Git. 
 
@@ -343,3 +343,10 @@ taipei-youbike-analytics/
 ├── README.md
 └── .gitignore
 ```
+
+## Explore the Project
+
+- **Dashboard:** View the [PDF report](powerbi/taipei_youbike_dashboard.pdf) or see the [Dashboard section](#dashboard) for screenshots and Power BI project details. 
+- **Analysis:** Review the SQL queries in [sql/analysis/](sql/analysis/). 
+- **Implementation:** Explore the Python loaders in [src/](src/) and the database scripts in [sql/](sql/). 
+- **Data sources:** See [data/README.md](data/README.md) for source links and expected local files. 
