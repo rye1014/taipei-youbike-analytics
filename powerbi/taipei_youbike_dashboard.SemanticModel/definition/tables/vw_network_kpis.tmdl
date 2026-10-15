@@ -65,8 +65,12 @@ table vw_network_kpis
 		mode: import
 		source =
 				let
-				    Source = Sql.Database("YOUR_SQL_SERVER,1433", "TaipeiYouBikeAnalytics"),
+				    Source = Sql.Database(ServerName, DatabaseName),
 				    dbo_vw_network_kpis = Source{[Schema="dbo",Item="vw_network_kpis"]}[Data]
 				in
 				    dbo_vw_network_kpis
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
 

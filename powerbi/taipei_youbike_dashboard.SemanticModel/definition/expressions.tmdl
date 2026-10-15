@@ -1,0 +1,14 @@
+expression ServerName = "YOUR_SQL_SERVER" meta [IsParameterQuery=true, Type="Text", IsParameterQueryRequired=true]
+	lineageTag: fd56f652-d0ea-4281-ad1e-9032b4fd2527
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Text
+
+expression DatabaseName = "TaipeiYouBikeAnalytics" meta [IsParameterQuery=true, Type="Text", IsParameterQueryRequired=true]
+	lineageTag: 7561fc08-c547-403c-b47d-fd411fbc3157
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Text
+

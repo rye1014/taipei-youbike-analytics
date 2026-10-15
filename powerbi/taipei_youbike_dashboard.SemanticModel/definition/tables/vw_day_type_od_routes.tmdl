@@ -89,8 +89,12 @@ table vw_day_type_od_routes
 		mode: import
 		source =
 				let
-				    Source = Sql.Database("YOUR_SQL_SERVER,1433", "TaipeiYouBikeAnalytics"),
+				    Source = Sql.Database(ServerName, DatabaseName),
 				    dbo_vw_day_type_od_routes = Source{[Schema="dbo",Item="vw_day_type_od_routes"]}[Data]
 				in
 				    dbo_vw_day_type_od_routes
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Exception
 

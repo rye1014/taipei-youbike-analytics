@@ -74,10 +74,12 @@ table vw_station_hourly_flow
 		mode: import
 		source =
 				let
-				    Source = Sql.Database("YOUR_SQL_SERVER,1433", "TaipeiYouBikeAnalytics"),
+				    Source = Sql.Database(ServerName, DatabaseName),
 				    dbo_vw_station_hourly_flow = Source{[Schema="dbo",Item="vw_station_hourly_flow"]}[Data]
 				in
 				    dbo_vw_station_hourly_flow
 
 	annotation PBI_ResultType = Exception
+
+	annotation PBI_NavigationStepName = Navigation
 

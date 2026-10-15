@@ -84,10 +84,12 @@ table vw_station_activity
 		mode: import
 		source =
 				let
-				    Source = Sql.Database("YOUR_SQL_SERVER,1433", "TaipeiYouBikeAnalytics"),
+				    Source = Sql.Database(ServerName, DatabaseName),
 				    dbo_vw_station_activity = Source{[Schema="dbo",Item="vw_station_activity"]}[Data]
 				in
 				    dbo_vw_station_activity
 
-	annotation PBI_ResultType = Exception
+	annotation PBI_ResultType = Table
+
+	annotation PBI_NavigationStepName = Navigation
 

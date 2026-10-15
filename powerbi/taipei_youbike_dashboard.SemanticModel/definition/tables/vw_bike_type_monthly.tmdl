@@ -48,8 +48,12 @@ table vw_bike_type_monthly
 		mode: import
 		source =
 				let
-				    Source = Sql.Database("YOUR_SQL_SERVER,1433", "TaipeiYouBikeAnalytics"),
+				    Source = Sql.Database(ServerName, DatabaseName),
 				    dbo_vw_bike_type_monthly = Source{[Schema="dbo",Item="vw_bike_type_monthly"]}[Data]
 				in
 				    dbo_vw_bike_type_monthly
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Exception
 

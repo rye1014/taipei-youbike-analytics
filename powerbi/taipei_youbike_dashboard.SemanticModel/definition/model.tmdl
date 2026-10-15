@@ -9,7 +9,7 @@ model Model
 
 annotation __PBI_TimeIntelligenceEnabled = 1
 
-annotation PBI_QueryOrder = ["vw_network_kpis","vw_monthly_usage","vw_hourly_usage","vw_duration_distribution","vw_bike_type_monthly","vw_station_activity","vw_station_hourly_flow","vw_station_peak_flow","vw_od_routes","vw_area_pairs","vw_peak_od_routes","vw_day_type_od_routes","vw_area_activity","vw_area_flows","vw_station_pairs"]
+annotation PBI_QueryOrder = ["vw_network_kpis","vw_monthly_usage","vw_hourly_usage","vw_duration_distribution","vw_bike_type_monthly","vw_station_activity","vw_station_hourly_flow","vw_station_peak_flow","vw_od_routes","vw_area_pairs","vw_peak_od_routes","vw_day_type_od_routes","vw_area_activity","vw_area_flows","vw_station_pairs","ServerName","DatabaseName"]
 
 annotation PBI_ProTooling = ["DevMode"]
 

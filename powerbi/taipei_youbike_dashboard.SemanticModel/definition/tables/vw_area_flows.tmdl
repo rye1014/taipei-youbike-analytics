@@ -40,8 +40,12 @@ table vw_area_flows
 		mode: import
 		source =
 				let
-				    Source = Sql.Database("YOUR_SQL_SERVER,1433", "TaipeiYouBikeAnalytics"),
+				    Source = Sql.Database(ServerName, DatabaseName),
 				    dbo_vw_area_flows = Source{[Schema="dbo",Item="vw_area_flows"]}[Data]
 				in
 				    dbo_vw_area_flows
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Exception
 

@@ -44,8 +44,12 @@ table vw_duration_distribution
 		mode: import
 		source =
 				let
-				    Source = Sql.Database("YOUR_SQL_SERVER,1433", "TaipeiYouBikeAnalytics"),
+				    Source = Sql.Database(ServerName, DatabaseName),
 				    dbo_vw_duration_distribution = Source{[Schema="dbo",Item="vw_duration_distribution"]}[Data]
 				in
 				    dbo_vw_duration_distribution
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
 

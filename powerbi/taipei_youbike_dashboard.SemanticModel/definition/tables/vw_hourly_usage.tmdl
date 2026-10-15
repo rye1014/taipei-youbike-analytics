@@ -50,8 +50,12 @@ table vw_hourly_usage
 		mode: import
 		source =
 				let
-				    Source = Sql.Database("YOUR_SQL_SERVER,1433", "TaipeiYouBikeAnalytics"),
+				    Source = Sql.Database(ServerName, DatabaseName),
 				    dbo_vw_hourly_usage = Source{[Schema="dbo",Item="vw_hourly_usage"]}[Data]
 				in
 				    dbo_vw_hourly_usage
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Exception
 

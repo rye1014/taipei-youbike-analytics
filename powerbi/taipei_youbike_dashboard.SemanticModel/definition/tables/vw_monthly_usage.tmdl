@@ -51,8 +51,12 @@ table vw_monthly_usage
 		mode: import
 		source =
 				let
-				    Source = Sql.Database("YOUR_SQL_SERVER,1433", "TaipeiYouBikeAnalytics"),
+				    Source = Sql.Database(ServerName, DatabaseName),
 				    dbo_vw_monthly_usage = Source{[Schema="dbo",Item="vw_monthly_usage"]}[Data]
 				in
 				    dbo_vw_monthly_usage
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
 
